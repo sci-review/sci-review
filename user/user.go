@@ -7,14 +7,14 @@ import (
 )
 
 type User struct {
-	Id        uuid.UUID `json:"id"`
-	Name      string    `json:"name"`
-	Email     string    `json:"email"`
-	Password  string    `json:"-"`
-	Role      Role      `json:"role"`
-	Active    bool      `json:"active"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	Id        uuid.UUID `db:"id" json:"id"`
+	Name      string    `db:"name" json:"name"`
+	Email     string    `db:"email" json:"email"`
+	Password  string    `db:"password" json:"-"`
+	Role      Role      `db:"role" json:"role"`
+	Active    bool      `db:"active" json:"active"`
+	CreatedAt time.Time `db:"created_at" json:"created_at"`
+	UpdatedAt time.Time `db:"updated_at" json:"updated_at"`
 }
 
 func NewUser(name string, email string, password string) *User {
