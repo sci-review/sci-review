@@ -3,8 +3,19 @@ Content-Type: application/json
 
 {
   "name": "John Doe",
-  "email": "john2@email.com",
+  "email": "john@email.com",
   "password": "123456"
+}
+
+###
+
+POST http://127.0.0.1:8080/users
+Content-Type: application/json
+
+{
+  "name": "Mary Jane",
+  "email": "mary@email.com",
+  "password": "abcdef"
 }
 
 ###

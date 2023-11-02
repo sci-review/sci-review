@@ -30,7 +30,8 @@ func main() {
 	userService := user.NewUserService(userRepo)
 	userHandler := user.NewUserHandler(userService)
 	refreshTokenRepo := auth.NewRefreshTokenRepo(db)
-	authService := auth.NewAuthService(userRepo, refreshTokenRepo)
+	loginAttemptRepo := auth.NewLoginAttemptRepo(db)
+	authService := auth.NewAuthService(userRepo, loginAttemptRepo, refreshTokenRepo)
 
 	r := gin.Default()
 	auth.Register(r, authService)
