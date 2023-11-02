@@ -1,6 +1,9 @@
 package auth
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+	"sci-review/common"
+)
 
 type AuthHandler struct {
 	AuthService *AuthService
@@ -11,8 +14,8 @@ func NewAuthHandler(authService *AuthService) *AuthHandler {
 }
 
 type LoginForm struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required"`
 }
 
 type LoginAttemptData struct {
@@ -26,6 +29,11 @@ func (ah *AuthHandler) Login(c *gin.Context) {
 	loginForm := new(LoginForm)
 	if err := c.ShouldBindJSON(&loginForm); err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := common.Validate(loginForm); len(err) > 0 {
+		c.JSON(400, gin.H{"errors": err})
 		return
 	}
 
