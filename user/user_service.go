@@ -6,7 +6,10 @@ type UserService struct {
 	UserRepo *UserRepo
 }
 
-var ErrorUserAlreadyExists = errors.New("user already exists")
+var (
+	ErrorUserAlreadyExists = errors.New("user already exists")
+	ErrorUserNotFound      = errors.New("user not found")
+)
 
 func NewUserService(userRepo *UserRepo) *UserService {
 	return &UserService{UserRepo: userRepo}

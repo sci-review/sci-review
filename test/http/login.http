@@ -1,0 +1,19 @@
+POST http://127.0.0.1:8080/login
+Content-Type: application/json
+
+{
+  "email": "john2@email.com",
+  "password": "123456"
+}
+
+###
+
+POST http://127.0.0.1:8080/login
+Content-Type: application/json
+
+{
+  "email": "bad-email@email.com",
+  "password": "bad-password"
+}
+
+###

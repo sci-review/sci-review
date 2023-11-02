@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sci-review/auth"
 	"sci-review/user"
 )
 
@@ -28,8 +29,11 @@ func main() {
 	userRepo := user.NewUserRepo(db)
 	userService := user.NewUserService(userRepo)
 	userHandler := user.NewUserHandler(userService)
+	refreshTokenRepo := auth.NewRefreshTokenRepo(db)
+	authService := auth.NewAuthService(userRepo, refreshTokenRepo)
 
 	r := gin.Default()
+	auth.Register(r, authService)
 	r.POST("/users", userHandler.Create)
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
