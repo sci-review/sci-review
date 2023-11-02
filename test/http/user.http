@@ -19,3 +19,15 @@ Content-Type: application/json
 }
 
 ###
+
+# Validation error
+POST http://127.0.0.1:8080/users
+Content-Type: application/json
+
+{
+  "name": "J",
+  "email": "johnemail.com",
+  "password": "1456"
+}
+
+###
