@@ -5,12 +5,20 @@ import (
 	"github.com/gin-gonic/gin"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
+	"github.com/joho/godotenv"
+	"log"
 	"net/http"
+	"os"
 	"sci-review/user"
 )
 
 func main() {
-	dataSourceName := "postgresql://postgres:postgres@localhost:5432/sci_review"
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	dataSourceName := os.Getenv("DATABASE_URL")
 	db, err := sqlx.Connect("pgx", dataSourceName)
 	if err != nil {
 		fmt.Println(err)
@@ -28,5 +36,5 @@ func main() {
 			"message": "pong",
 		})
 	})
-	r.Run()
+	r.Run(os.Getenv("PORT"))
 }
