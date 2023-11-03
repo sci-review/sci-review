@@ -9,11 +9,11 @@ import (
 type Member struct {
 	Id             uuid.UUID  `db:"id" json:"id"`
 	UserId         uuid.UUID  `db:"user_id" json:"userId"`
-	OrganizationId uuid.UUID  `db:"organization_id" json:"orgId"`
+	OrganizationId uuid.UUID  `db:"organization_id" json:"organizationId"`
 	Role           MemberRole `db:"role" json:"role"`
 	Active         bool       `db:"active" json:"active"`
-	CreatedAt      time.Time  `db:"created_at" json:"created_at"`
-	UpdatedAt      time.Time  `db:"updated_at" json:"updated_at"`
+	CreatedAt      time.Time  `db:"created_at" json:"createdAt"`
+	UpdatedAt      time.Time  `db:"updated_at" json:"updatedAt"`
 }
 
 func NewMember(userId uuid.UUID, organizationId uuid.UUID, role MemberRole, active bool) *Member {

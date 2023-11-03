@@ -2,6 +2,7 @@ package organization
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"golang.org/x/exp/slog"
 	"sci-review/auth"
 	"sci-review/common"
@@ -17,6 +18,7 @@ func NewOrganizationHandler(organizationService *OrganizationService) *Organizat
 
 func (oh *OrganizationHandler) Create(c *gin.Context) {
 	principal := c.MustGet("principal").(*auth.Principal)
+
 	organizationCreateForm := new(OrganizationCreateForm)
 	if err := c.ShouldBindJSON(&organizationCreateForm); err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
@@ -36,12 +38,64 @@ func (oh *OrganizationHandler) Create(c *gin.Context) {
 		c.JSON(409, gin.H{"error": err.Error()})
 		return
 	}
+
 	c.JSON(201, user)
+}
+
+func (oh *OrganizationHandler) List(c *gin.Context) {
+	principal := c.MustGet("principal").(*auth.Principal)
+
+	organizations, err := oh.OrganizationService.List(principal.Id)
+	if err != nil {
+		c.JSON(409, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(200, organizations)
+}
+
+func (oh *OrganizationHandler) Get(c *gin.Context) {
+	principal := c.MustGet("principal").(*auth.Principal)
+
+	id, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+
+	organization, err := oh.OrganizationService.Get(id, principal.Id)
+	if err != nil {
+		c.JSON(404, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(200, organization)
+}
+
+func (oh *OrganizationHandler) Archive(c *gin.Context) {
+	principal := c.MustGet("principal").(*auth.Principal)
+
+	id, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+
+	err = oh.OrganizationService.Archive(id, principal.Id)
+	if err != nil {
+		c.JSON(409, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(204, nil)
 }
 
 func Register(r *gin.Engine, organizationService *OrganizationService, middleware gin.HandlerFunc) {
 	slog.Info("organization handler", "status", "registering")
 	handler := NewOrganizationHandler(organizationService)
 	r.POST("/organizations", middleware, handler.Create)
+	r.GET("/organizations", middleware, handler.List)
+	r.GET("/organizations/:id", middleware, handler.Get)
+	r.POST("/organizations/:id/archive", middleware, handler.Archive)
 	slog.Info("organization handler", "status", "registered")
 }

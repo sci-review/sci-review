@@ -49,3 +49,54 @@ func (os *OrganizationService) Create(data OrganizationCreateForm, userId uuid.U
 
 	return organization, nil
 }
+
+func (os *OrganizationService) List(id uuid.UUID) ([]Organization, error) {
+	organizations, err := os.OrganizationRepo.FindAllByUserId(id)
+	if err != nil {
+		slog.Error("organization list", "error", err.Error())
+		return nil, common.DbInternalError
+	}
+
+	slog.Info("organization list", "result", "success", "organizations", organizations)
+
+	return organizations, nil
+}
+
+func (os *OrganizationService) Get(id uuid.UUID, userId uuid.UUID) (*Organization, error) {
+	organization, err := os.OrganizationRepo.GetById(id)
+	if err != nil {
+		slog.Error("organization get", "error", err.Error())
+		return nil, common.DbInternalError
+	}
+
+	if !organization.IsActiveMember(userId) {
+		slog.Error("organization get", "error", "user is not a active member of the organization")
+		return nil, common.ForbiddenError
+	}
+
+	slog.Info("organization get", "result", "success", "organization", organization)
+
+	return organization, nil
+}
+
+func (os *OrganizationService) Archive(id uuid.UUID, userId uuid.UUID) error {
+	organization, err := os.OrganizationRepo.GetById(id)
+	if err != nil {
+		slog.Error("organization archive", "error", err.Error())
+		return common.DbInternalError
+	}
+
+	if !organization.IsOwner(userId) {
+		slog.Error("organization archive", "error", "user is not a owner of the organization")
+		return common.ForbiddenError
+	}
+
+	if err := os.OrganizationRepo.Archive(id); err != nil {
+		slog.Error("organization archive", "error", err.Error())
+		return common.DbInternalError
+	}
+
+	slog.Info("organization archive", "result", "success", "organization", organization)
+
+	return nil
+}

@@ -2,6 +2,7 @@ CREATE TABLE organizations(
     id UUID,
     name VARCHAR NOT NULL,
     description TEXT NOT NULL,
+    archived BOOLEAN NOT NULL,
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL,
     CONSTRAINT organizations_pk PRIMARY KEY (id)

@@ -9,7 +9,7 @@ Content-Type: application/json
 
 ###
 POST http://127.0.0.1:8080/organizations
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTkwMjA0MDAsImlhdCI6MTY5OTAxNjgwMCwiaXNzIjoic2NpX3JldmlldyIsInJvbGUiOiJSZXZpZXdlciIsInN1YiI6IjM1OGM1YTBkLWJhZTktNGNlZi1hOTkzLTM0MGMyNDRmYTcyMCJ9.vpDedFqHYxtwaH74dBEWm_bZvn2XdiPfW4QyOD5Zr4A
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTkwNTA3MzgsImlhdCI6MTY5OTA0NzEzOCwiaXNzIjoic2NpX3JldmlldyIsInJvbGUiOiJSZXZpZXdlciIsInN1YiI6ImI5YTNkOGM3LTE4YzctNGY4Zi1hNTY0LTdlMjdlMDMzN2JmYSJ9._VA1CptHeiwoc_Zbdbu_wmE5n-2vxL32gRkFnqj0Gqc
 Content-Type: application/json
 
 {
@@ -20,7 +20,7 @@ Content-Type: application/json
 
 ### Validation erros
 POST http://127.0.0.1:8080/organizations
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTkwNDE1OTgsImlhdCI6MTY5OTAzNzk5OCwiaXNzIjoic2NpX3JldmlldyIsInJvbGUiOiJSZXZpZXdlciIsInN1YiI6IjliNzcyNzEwLTI3MjMtNGQ0NC1hYWNiLWRiYTY0ODVmNTgzYiJ9.nTqGeMMcRJ848LSABpkJbyYtOdtI0rf9bgQQz_v0KHA
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTkwNDY1MjAsImlhdCI6MTY5OTA0MjkyMCwiaXNzIjoic2NpX3JldmlldyIsInJvbGUiOiJSZXZpZXdlciIsInN1YiI6ImI5YTNkOGM3LTE4YzctNGY4Zi1hNTY0LTdlMjdlMDMzN2JmYSJ9.FEu4_PR6O3_xAQVT-HfRhlWVTrquYUFGWhXCzTrBJ_Y
 Content-Type: application/json
 
 {
@@ -30,13 +30,21 @@ Content-Type: application/json
 
 ###
 POST http://127.0.0.1:8080/organizations
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTkwNDE1OTgsImlhdCI6MTY5OTAzNzk5OCwiaXNzIjoic2NpX3JldmlldyIsInJvbGUiOiJSZXZpZXdlciIsInN1YiI6IjliNzcyNzEwLTI3MjMtNGQ0NC1hYWNiLWRiYTY0ODVmNTgzYiJ9.nTqGeMMcRJ848LSABpkJbyYtOdtI0rf9bgQQz_v0KHA
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTkwNDY1MjAsImlhdCI6MTY5OTA0MjkyMCwiaXNzIjoic2NpX3JldmlldyIsInJvbGUiOiJSZXZpZXdlciIsInN1YiI6ImI5YTNkOGM3LTE4YzctNGY4Zi1hNTY0LTdlMjdlMDMzN2JmYSJ9.FEu4_PR6O3_xAQVT-HfRhlWVTrquYUFGWhXCzTrBJ_Y
 Content-Type: application/json
 
 {
-  "name": "My organization 1",
-  "description": "My organization 1 description"
+  "name": "My organization XXX",
+  "description": "My organization XXXX"
 }
 
+###
+GET http://127.0.0.1:8080/organizations
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTkwNTA3MzgsImlhdCI6MTY5OTA0NzEzOCwiaXNzIjoic2NpX3JldmlldyIsInJvbGUiOiJSZXZpZXdlciIsInN1YiI6ImI5YTNkOGM3LTE4YzctNGY4Zi1hNTY0LTdlMjdlMDMzN2JmYSJ9._VA1CptHeiwoc_Zbdbu_wmE5n-2vxL32gRkFnqj0Gqc
+
+
+###
+POST http://127.0.0.1:8080/organizations/5878650d-167f-4ea4-a9c7-52d1d3401c79/archive
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTkwNTA3MzgsImlhdCI6MTY5OTA0NzEzOCwiaXNzIjoic2NpX3JldmlldyIsInJvbGUiOiJSZXZpZXdlciIsInN1YiI6ImI5YTNkOGM3LTE4YzctNGY4Zi1hNTY0LTdlMjdlMDMzN2JmYSJ9._VA1CptHeiwoc_Zbdbu_wmE5n-2vxL32gRkFnqj0Gqc
 
 

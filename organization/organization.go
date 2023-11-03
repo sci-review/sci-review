@@ -10,8 +10,10 @@ type Organization struct {
 	Id          uuid.UUID `db:"id" json:"id"`
 	Name        string    `db:"name" json:"name"`
 	Description string    `db:"description" json:"description"`
-	CreatedAt   time.Time `db:"created_at" json:"created_at"`
-	UpdatedAt   time.Time `db:"updated_at" json:"updated_at"`
+	CreatedAt   time.Time `db:"created_at" json:"createdAt"`
+	UpdatedAt   time.Time `db:"updated_at" json:"updatedAt"`
+	Archived    bool      `db:"archived" json:"archived"`
+	Members     []Member  `db:"-" json:"members"`
 }
 
 func NewOrganization(name string, description string) *Organization {
@@ -21,7 +23,31 @@ func NewOrganization(name string, description string) *Organization {
 		Description: description,
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
+		Archived:    false,
+		Members:     []Member{},
 	}
+}
+
+func (o *Organization) AddMember(member Member) {
+	o.Members = append(o.Members, member)
+}
+
+func (o Organization) IsActiveMember(userId uuid.UUID) bool {
+	for _, member := range o.Members {
+		if member.UserId == userId && member.Active {
+			return true
+		}
+	}
+	return false
+}
+
+func (o Organization) IsOwner(userId uuid.UUID) bool {
+	for _, member := range o.Members {
+		if member.UserId == userId && member.Role == Owner {
+			return true
+		}
+	}
+	return false
 }
 
 func (o Organization) LogValue() slog.Value {
