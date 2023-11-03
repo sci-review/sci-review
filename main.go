@@ -41,5 +41,14 @@ func main() {
 			"message": "pong",
 		})
 	})
+
+	r.GET("/protected", auth.JwtMiddleware(), func(c *gin.Context) {
+		principal := c.MustGet("principal").(*auth.Principal)
+		c.JSON(http.StatusOK, gin.H{
+			"message":   "protected route",
+			"principal": principal,
+		})
+	})
+
 	r.Run(os.Getenv("PORT"))
 }

@@ -57,3 +57,26 @@ func GenerateRefreshToken(userId uuid.UUID, refreshTokenId uuid.UUID) string {
 
 	return signedString
 }
+
+func ParseToken(tokenString string) (*jwt.Token, error) {
+	key := os.Getenv("JWT_KEY")
+	iss := os.Getenv("JWT_ISSUER")
+
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, jwt.ErrSignatureInvalid
+		}
+
+		if token.Claims.(jwt.MapClaims)["iss"] != iss {
+			return nil, jwt.ErrTokenUnverifiable
+		}
+
+		return []byte(key), nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return token, nil
+}

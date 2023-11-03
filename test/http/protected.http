@@ -1,0 +1,10 @@
+### Without token
+GET http://127.0.0.1:8080/protected
+
+###
+GET http://127.0.0.1:8080/protected
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTkwMjA0MDAsImlhdCI6MTY5OTAxNjgwMCwiaXNzIjoic2NpX3JldmlldyIsInJvbGUiOiJSZXZpZXdlciIsInN1YiI6IjM1OGM1YTBkLWJhZTktNGNlZi1hOTkzLTM0MGMyNDRmYTcyMCJ9.vpDedFqHYxtwaH74dBEWm_bZvn2XdiPfW4QyOD5Zr4A
+
+###
+GET http://127.0.0.1:8080/protected
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTkwMjA5ODUsImlhdCI6MTY5OTAxNzM4NSwiaXNzIjoic2NpX3JldmlldyIsInJvbGUiOiJSZXZpZXdlciIsInN1YiI6IjIwZjdlOGI4LTFhZmYtNDIxMS1hNTFiLTE1YTIyNWZlOTI0ZCJ9.poriemVtFpNw8IbHAaUf_s_uM1NTSZquExoLKkdc3I0
