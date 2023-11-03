@@ -1,9 +1,9 @@
 package auth
 
 import (
-	"fmt"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"golang.org/x/exp/slog"
 	"os"
 	"sci-review/user"
 	"strconv"
@@ -27,9 +27,10 @@ func GenerateAccessToken(userId uuid.UUID, role user.Role) string {
 		})
 	signedString, err := token.SignedString([]byte(key))
 	if err != nil {
-		fmt.Println(err)
+		slog.Warn("generate access token", "error", "error signing token", "userId", userId)
 		return ""
 	}
+	slog.Info("generate access token", "result", "success", "userId", userId)
 
 	return signedString
 }
@@ -51,10 +52,11 @@ func GenerateRefreshToken(userId uuid.UUID, refreshTokenId uuid.UUID) string {
 		})
 	signedString, err := token.SignedString([]byte(key))
 	if err != nil {
-		fmt.Println(err)
+		slog.Warn("generate refresh token", "error", "error signing token", "userId", userId)
 		return ""
 	}
 
+	slog.Info("generate refresh token", "result", "success", "userId", userId)
 	return signedString
 }
 
@@ -64,10 +66,12 @@ func ParseToken(tokenString string) (*jwt.Token, error) {
 
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			slog.Error("parse token", "error", "unexpected signing method", "token", tokenString)
 			return nil, jwt.ErrSignatureInvalid
 		}
 
 		if token.Claims.(jwt.MapClaims)["iss"] != iss {
+			slog.Error("parse token", "error", "invalid issuer", "token", tokenString)
 			return nil, jwt.ErrTokenUnverifiable
 		}
 
@@ -75,6 +79,7 @@ func ParseToken(tokenString string) (*jwt.Token, error) {
 	})
 
 	if err != nil {
+		slog.Error("parse token", "error", err.Error())
 		return nil, err
 	}
 

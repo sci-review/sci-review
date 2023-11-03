@@ -3,6 +3,7 @@ package user
 import (
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
+	"golang.org/x/exp/slog"
 	"time"
 )
 
@@ -29,4 +30,16 @@ func NewUser(name string, email string, password string) *User {
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
+}
+
+func (u User) LogValue() slog.Value {
+	return slog.GroupValue(
+		slog.String("id", u.Id.String()),
+		slog.String("name", u.Name),
+		slog.String("email", u.Email),
+		slog.String("role", string(u.Role)),
+		slog.Bool("active", u.Active),
+		slog.Time("created_at", u.CreatedAt),
+		slog.Time("updated_at", u.UpdatedAt),
+	)
 }

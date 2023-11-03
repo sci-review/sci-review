@@ -2,6 +2,7 @@ package auth
 
 import (
 	"github.com/google/uuid"
+	"golang.org/x/exp/slog"
 	"time"
 )
 
@@ -33,4 +34,20 @@ func NewUnSuccessLoginAttempt(email string, IPAddress string, userAgent string) 
 
 func NewSuccessLoginAttempt(userID uuid.UUID, email string, IPAddress string, userAgent string) *LoginAttempt {
 	return NewLoginAttempt(uuid.NullUUID{UUID: userID, Valid: true}, email, true, IPAddress, userAgent)
+}
+
+func (la LoginAttempt) LogValue() slog.Value {
+	var userId = ""
+	if la.UserID.Valid {
+		userId = la.UserID.UUID.String()
+	}
+	return slog.GroupValue(
+		slog.String("id", la.Id.String()),
+		slog.String("userId", userId),
+		slog.String("email", la.Email),
+		slog.Bool("success", la.Success),
+		slog.String("ipAddress", la.IPAddress),
+		slog.String("userAgent", la.UserAgent),
+		slog.Time("timestamp", la.Timestamp),
+	)
 }
