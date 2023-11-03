@@ -1,9 +1,16 @@
 package auth
 
 import (
+	"errors"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
+	"sci-review/common"
 	"sci-review/user"
+)
+
+var (
+	ErrorInvalidRefreshToken = errors.New("invalid refresh token")
 )
 
 type AuthService struct {
@@ -66,4 +73,61 @@ func (as AuthService) Login(data LoginAttemptData) (*TokenResponse, error) {
 		GenerateRefreshToken(userFounded.Id, refreshToken.Id),
 	)
 	return tokenResponse, nil
+}
+
+func (as AuthService) RotateToken(data *RotateTokenData) (*TokenResponse, error) {
+	token, err := ParseToken(data.RefreshToken)
+	if err != nil {
+		return nil, ErrorInvalidRefreshToken
+	}
+
+	sub := token.Claims.(jwt.MapClaims)["sub"].(string)
+	jti := token.Claims.(jwt.MapClaims)["jti"].(string)
+	userId := uuid.MustParse(sub)
+	refreshTokenId := uuid.MustParse(jti)
+
+	userFounded, err := as.UserRepo.GetById(userId)
+	if err != nil {
+		return nil, common.DbInternalError
+	}
+	if userFounded == nil {
+		return nil, ErrorInvalidRefreshToken
+	}
+	if !userFounded.Active {
+		return nil, ErrorInvalidRefreshToken
+	}
+
+	refreshTokenFounded, err := as.RefreshTokenRepo.GetById(refreshTokenId)
+	if err != nil {
+		return nil, common.DbInternalError
+	}
+
+	if !refreshTokenFounded.Active {
+		return nil, ErrorInvalidRefreshToken
+	}
+
+	var tx = as.RefreshTokenRepo.DB.MustBegin()
+
+	refreshToken := NewRefreshTokenWithParent(userFounded.Id, refreshTokenFounded.Id)
+	if err := as.RefreshTokenRepo.InvalidateAllRefreshTokens(userFounded.Id, tx); err != nil {
+		tx.Rollback()
+		return nil, common.DbInternalError
+	}
+
+	if err := as.RefreshTokenRepo.SaveRefreshToken(refreshToken, tx); err != nil {
+		tx.Rollback()
+		return nil, common.DbInternalError
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+
+	tokenResponse := NewTokenResponse(
+		*userFounded,
+		GenerateAccessToken(userFounded.Id, userFounded.Role),
+		GenerateRefreshToken(userFounded.Id, refreshToken.Id),
+	)
+	return tokenResponse, nil
+
 }

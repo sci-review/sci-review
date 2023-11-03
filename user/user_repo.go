@@ -1,6 +1,7 @@
 package user
 
 import (
+	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -27,6 +28,15 @@ func (ur *UserRepo) Create(user *User) error {
 func (ur *UserRepo) GetByEmail(email string) (*User, error) {
 	user := User{}
 	err := ur.DB.Get(&user, "SELECT * FROM users WHERE email = $1 LIMIT 1", email)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (ur *UserRepo) GetById(id uuid.UUID) (*User, error) {
+	user := User{}
+	err := ur.DB.Get(&user, "SELECT * FROM users WHERE id = $1 LIMIT 1", id)
 	if err != nil {
 		return nil, err
 	}

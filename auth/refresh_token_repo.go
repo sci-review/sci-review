@@ -34,3 +34,12 @@ func (rtr *RefreshTokenRepo) InvalidateAllRefreshTokens(userId uuid.UUID, tx *sq
 	}
 	return nil
 }
+
+func (rtr *RefreshTokenRepo) GetById(id uuid.UUID) (*RefreshToken, error) {
+	refreshToken := RefreshToken{}
+	err := rtr.DB.Get(&refreshToken, "SELECT * FROM refresh_tokens WHERE id = $1 LIMIT 1", id)
+	if err != nil {
+		return nil, err
+	}
+	return &refreshToken, nil
+}

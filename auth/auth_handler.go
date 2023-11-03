@@ -25,6 +25,10 @@ type LoginAttemptData struct {
 	UserAgent string `json:"userAgent"`
 }
 
+type RotateTokenData struct {
+	RefreshToken string `json:"refreshToken" validate:"required"`
+}
+
 func (ah *AuthHandler) Login(c *gin.Context) {
 	loginForm := new(LoginForm)
 	if err := c.ShouldBindJSON(&loginForm); err != nil {
@@ -52,7 +56,28 @@ func (ah *AuthHandler) Login(c *gin.Context) {
 	c.JSON(200, tokenResponse)
 }
 
+func (ah *AuthHandler) RotateToken(c *gin.Context) {
+	rotateTokenData := new(RotateTokenData)
+	if err := c.ShouldBindJSON(&rotateTokenData); err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := common.Validate(rotateTokenData); len(err) > 0 {
+		c.JSON(400, gin.H{"errors": err})
+		return
+	}
+
+	tokenResponse, err := ah.AuthService.RotateToken(rotateTokenData)
+	if err != nil {
+		c.JSON(401, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(200, tokenResponse)
+}
+
 func Register(r *gin.Engine, authService *AuthService) {
 	authHandler := NewAuthHandler(authService)
 	r.POST("/login", authHandler.Login)
+	r.POST("/rotate-token", authHandler.RotateToken)
 }

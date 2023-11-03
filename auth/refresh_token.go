@@ -24,3 +24,7 @@ func NewRefreshToken(userId uuid.UUID, parentTokenId uuid.NullUUID) *RefreshToke
 		Active:        true,
 	}
 }
+
+func NewRefreshTokenWithParent(userId uuid.UUID, parentTokenId uuid.UUID) *RefreshToken {
+	return NewRefreshToken(userId, uuid.NullUUID{UUID: parentTokenId, Valid: true})
+}
