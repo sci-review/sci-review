@@ -1,0 +1,42 @@
+### Without token
+POST http://127.0.0.1:8080/organizations
+Content-Type: application/json
+
+{
+  "name": "My organization 1",
+  "description": "My organization 1 description"
+}
+
+###
+POST http://127.0.0.1:8080/organizations
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTkwMjA0MDAsImlhdCI6MTY5OTAxNjgwMCwiaXNzIjoic2NpX3JldmlldyIsInJvbGUiOiJSZXZpZXdlciIsInN1YiI6IjM1OGM1YTBkLWJhZTktNGNlZi1hOTkzLTM0MGMyNDRmYTcyMCJ9.vpDedFqHYxtwaH74dBEWm_bZvn2XdiPfW4QyOD5Zr4A
+Content-Type: application/json
+
+{
+  "name": "My organization 1",
+  "description": "My organization 1 description"
+}
+
+
+### Validation erros
+POST http://127.0.0.1:8080/organizations
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTkwNDE1OTgsImlhdCI6MTY5OTAzNzk5OCwiaXNzIjoic2NpX3JldmlldyIsInJvbGUiOiJSZXZpZXdlciIsInN1YiI6IjliNzcyNzEwLTI3MjMtNGQ0NC1hYWNiLWRiYTY0ODVmNTgzYiJ9.nTqGeMMcRJ848LSABpkJbyYtOdtI0rf9bgQQz_v0KHA
+Content-Type: application/json
+
+{
+  "name": "",
+  "description": ""
+}
+
+###
+POST http://127.0.0.1:8080/organizations
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTkwNDE1OTgsImlhdCI6MTY5OTAzNzk5OCwiaXNzIjoic2NpX3JldmlldyIsInJvbGUiOiJSZXZpZXdlciIsInN1YiI6IjliNzcyNzEwLTI3MjMtNGQ0NC1hYWNiLWRiYTY0ODVmNTgzYiJ9.nTqGeMMcRJ848LSABpkJbyYtOdtI0rf9bgQQz_v0KHA
+Content-Type: application/json
+
+{
+  "name": "My organization 1",
+  "description": "My organization 1 description"
+}
+
+
+

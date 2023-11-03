@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"sci-review/auth"
+	"sci-review/organization"
 	"sci-review/user"
 )
 
@@ -43,11 +44,17 @@ func main() {
 	refreshTokenRepo := auth.NewRefreshTokenRepo(db)
 	loginAttemptRepo := auth.NewLoginAttemptRepo(db)
 	authService := auth.NewAuthService(userRepo, loginAttemptRepo, refreshTokenRepo)
+	organizationRepo := organization.NewOrganizationRepo(db)
+	organizationService := organization.NewOrganizationService(organizationRepo)
 	slog.Info("services initialized")
+
+	jwtMiddleware := auth.JwtMiddleware()
+	slog.Info("middleware initialized")
 
 	r := gin.Default()
 	auth.Register(r, authService)
 	user.Register(r, userService)
+	organization.Register(r, organizationService, jwtMiddleware)
 
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
@@ -55,7 +62,7 @@ func main() {
 		})
 	})
 
-	r.GET("/protected", auth.JwtMiddleware(), func(c *gin.Context) {
+	r.GET("/protected", jwtMiddleware, func(c *gin.Context) {
 		principal := c.MustGet("principal").(*auth.Principal)
 		c.JSON(http.StatusOK, gin.H{
 			"message":   "protected route",
