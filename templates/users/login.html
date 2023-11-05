@@ -1,0 +1,49 @@
+{{ define "users/login.html" }}
+{{ template "globals/header.html" . }}
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <h2>{{ .pageData.Title }}</h2>
+            <hr>
+            {{ if .from }}
+            <div class="alert alert-warning" role="alert">
+                Your account will be analyzed by an administrator. You will receive an e-mail when your account is activated.
+            </div>
+            {{ end }}
+            <div>
+                {{ if .pageData.Message }}
+                <div class="alert alert-danger" role="alert">
+                    {{ .pageData.Message }}
+                </div>
+                {{ end }}
+                {{ if .pageData.Errors }}
+                <div class="alert alert-danger" role="alert">
+                    <ul>
+                        {{ range $key, $value := .pageData.Errors }}
+                        <li>{{ $value.Error }}</li>
+                        {{ end }}
+                    </ul>
+                </div>
+                {{ end }}
+                <form action="/login" method="post">
+                    <input type="hidden" name="CSRF" value="" />
+                    <div class="mb-3">
+                        <label for="email" class="form-label">E-mail</label>
+                        <input type="email" class="form-control" id="email" name="email" value="{{ .loginForm.Email }}">
+                        <div class="invalid-feedback"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" value="{{ .loginForm.Password }}">
+                        <div class="invalid-feedback"></div>
+                    </div>
+                    <div class="mb-3">
+                        <button type="submit" class="btn btn-dark btn-sm">Login</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{{ template "globals/footer.html" . }}
+{{ end }}

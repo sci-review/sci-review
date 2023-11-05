@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"golang.org/x/exp/slog"
 	"sci-review/common"
+	"sci-review/user"
 )
 
 type AuthHandler struct {
@@ -15,8 +16,8 @@ func NewAuthHandler(authService *AuthService) *AuthHandler {
 }
 
 type LoginForm struct {
-	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required"`
+	Email    string `json:"email" form:"email" validate:"required,email"`
+	Password string `json:"password" form:"password" validate:"required"`
 }
 
 type LoginAttemptData struct {
@@ -39,16 +40,29 @@ type RotateTokenData struct {
 }
 
 func (ah *AuthHandler) Login(c *gin.Context) {
+	pageData := common.PageData{
+		Title:   "Login",
+		Active:  "login",
+		Message: "",
+	}
+
 	loginForm := new(LoginForm)
-	if err := c.ShouldBindJSON(&loginForm); err != nil {
-		slog.Warn("login", "error", "error binding json")
-		c.JSON(400, gin.H{"error": err.Error()})
+	if err := c.ShouldBind(&loginForm); err != nil {
+		pageData.Message = "Invalid form data"
+		c.HTML(200, "users/login.html", gin.H{
+			"pageData":  pageData,
+			"loginForm": loginForm,
+		})
 		return
 	}
 
 	if err := common.Validate(loginForm); len(err) > 0 {
 		slog.Warn("login", "error", "validation error")
-		c.JSON(400, gin.H{"errors": err})
+		pageData.Errors = err
+		c.HTML(200, "users/login.html", gin.H{
+			"pageData":  pageData,
+			"loginForm": loginForm,
+		})
 		return
 	}
 
@@ -63,7 +77,17 @@ func (ah *AuthHandler) Login(c *gin.Context) {
 	tokenResponse, err := ah.AuthService.Login(loginAttemptData)
 	if err != nil {
 		slog.Warn("login", "error", err.Error())
-		c.JSON(409, gin.H{"error": "Invalid credentials"})
+
+		if err == user.ErrorUserNotActive {
+			pageData.Message = "User not active"
+		} else {
+			pageData.Message = "Invalid email or password"
+		}
+
+		c.HTML(409, "users/login.html", gin.H{
+			"pageData":  pageData,
+			"loginForm": loginForm,
+		})
 		return
 	}
 	slog.Info("login", "result", "success")
@@ -94,9 +118,23 @@ func (ah *AuthHandler) RotateToken(c *gin.Context) {
 	c.JSON(200, tokenResponse)
 }
 
+func (ah *AuthHandler) LoginForm(c *gin.Context) {
+	from := c.Query("from")
+	pageData := common.PageData{
+		Title:   "Login",
+		Active:  "login",
+		Message: "",
+	}
+	c.HTML(200, "users/login.html", gin.H{
+		"pageData": pageData,
+		"from":     from,
+	})
+}
+
 func Register(r *gin.Engine, authService *AuthService) {
 	slog.Info("auth handler", "status", "registering")
 	authHandler := NewAuthHandler(authService)
+	r.GET("/login", authHandler.LoginForm)
 	r.POST("/login", authHandler.Login)
 	r.POST("/rotate-token", authHandler.RotateToken)
 	slog.Info("auth handler", "status", "registered")

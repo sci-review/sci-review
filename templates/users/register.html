@@ -1,0 +1,49 @@
+{{ define "users/register.html" }}
+{{ template "globals/header.html" . }}
+<div class="container">
+	<div class="row">
+		<div class="col-md-8 offset-md-2">
+			<h2>{{ .pageData.Title }}</h2>
+			<hr>
+			<div>
+				{{ if .pageData.Message }}
+				<div class="alert alert-danger" role="alert">
+					{{ .pageData.Message }}
+				</div>
+				{{ end }}
+				{{ if .pageData.Errors }}
+				<div class="alert alert-danger" role="alert">
+					<ul>
+						{{ range $key, $value := .pageData.Errors  }}
+							<li>{{ $value.Error }}</li>
+						{{ end }}
+					</ul>
+				</div>
+				{{ end }}
+				<form action="/register" method="post">
+					<input type="hidden" name="CSRF" value="" />
+					<div class="mb-3">
+						<label for="name" class="form-label">Name</label>
+						<input type="text" class="form-control" id="name" name="name" value="{{ .userCreateForm.Name }}">
+						<div class="invalid-feedback"></div>
+					</div>
+					<div class="mb-3">
+						<label for="email" class="form-label">E-mail</label>
+						<input type="email" class="form-control" id="email" name="email" value="{{ .userCreateForm.Email }}">
+						<div class="invalid-feedback"></div>
+					</div>
+					<div class="mb-3">
+						<label for="password" class="form-label">Password</label>
+						<input type="password" class="form-control" id="password" name="password" value="{{ .userCreateForm.Password }}">
+						<div class="invalid-feedback"></div>
+					</div>
+					<div class="mb-3">
+						<button type="submit" class="btn btn-dark btn-sm">Register</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+{{ template "globals/footer.html" . }}
+{{ end }}

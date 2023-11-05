@@ -52,9 +52,16 @@ func main() {
 	slog.Info("middleware initialized")
 
 	r := gin.Default()
+	r.LoadHTMLGlob("templates/**/*")
+	r.Static("/assets", "./assets")
+
 	auth.Register(r, authService)
 	user.Register(r, userService)
 	organization.Register(r, organizationService, jwtMiddleware)
+
+	r.GET("/", func(c *gin.Context) {
+		c.Redirect(http.StatusMultipleChoices, "/register")
+	})
 
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
