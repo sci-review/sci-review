@@ -46,6 +46,8 @@ func main() {
 	authService := service.NewAuthService(userRepo, loginAttemptRepo)
 	organizationRepo := repo.NewOrganizationRepo(db)
 	organizationService := service.NewOrganizationService(organizationRepo)
+	reviewRepo := repo.NewReviewRepo(db)
+	reviewService := service.NewReviewService(reviewRepo)
 	slog.Info("services initialized")
 
 	authMiddleware := handler.AuthMiddleware()
@@ -62,6 +64,7 @@ func main() {
 	handler.RegisterAuthHandler(r, authService)
 	handler.RegisterUserHandler(r, userService)
 	handler.RegisterOrganizationHandler(r, organizationService, authMiddleware)
+	handler.RegisterReviewHandler(r, reviewService, authMiddleware)
 
 	slog.Info("routes registered")
 

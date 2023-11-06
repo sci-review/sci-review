@@ -1,8 +1,8 @@
 package model
 
-type Role string
+type UserRole string
 
 const (
-	Reviewer Role = "Reviewer"
-	Admin         = "Admin"
+	UserReviewer UserRole = "UserReviewer"
+	UserAdmin             = "UserAdmin"
 )
