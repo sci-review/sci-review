@@ -92,10 +92,22 @@ func (ah *AuthHandler) LoginForm(c *gin.Context) {
 	})
 }
 
+func (ah *AuthHandler) Logout(c *gin.Context) {
+	session := sessions.Default(c)
+	session.Clear()
+	err := session.Save()
+	if err != nil {
+		slog.Error("logout", "error", err.Error())
+		c.AbortWithStatus(500)
+	}
+	c.Redirect(302, "/login")
+}
+
 func RegisterAuthHandler(r *gin.Engine, authService *service.AuthService) {
 	slog.Info("middleware handler", "status", "registering")
 	authHandler := NewAuthHandler(authService)
 	r.GET("/login", authHandler.LoginForm)
 	r.POST("/login", authHandler.Login)
+	r.GET("/logout", authHandler.Logout)
 	slog.Info("middleware handler", "status", "registered")
 }
