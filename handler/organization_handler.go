@@ -85,19 +85,28 @@ func (oh *OrganizationHandler) List(c *gin.Context) {
 func (oh *OrganizationHandler) Get(c *gin.Context) {
 	principal := c.MustGet("principal").(*model.Principal)
 
+	pageData := common.PageData{
+		Title:  "Organization",
+		Active: "organizations",
+		User:   principal,
+	}
+
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		c.Redirect(302, "/organizations")
 		return
 	}
 
 	organization, err := oh.OrganizationService.Get(id, principal.Id)
 	if err != nil {
-		c.JSON(404, gin.H{"error": err.Error()})
+		c.Redirect(302, "/organizations")
 		return
 	}
 
-	c.JSON(200, organization)
+	c.HTML(200, "organizations/show.html", gin.H{
+		"pageData":     pageData,
+		"organization": organization,
+	})
 }
 
 func (oh *OrganizationHandler) Archive(c *gin.Context) {
