@@ -1,0 +1,43 @@
+{{ define "reviews/index.html" }}
+{{ template "globals/header.html" . }}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div style="display: flex; justify-content: space-between; align-items: center">
+                <h2>{{ .pageData.Title }}</h2>
+                <a href="/reviews/new" class="btn btn-dark btn-sm">New Review</a>
+            </div>
+            <hr>
+            <div>
+                {{ if .pageData.Message }}
+                <div class="alert alert-danger" role="alert">
+                    {{ .pageData.Message }}
+                </div>
+                {{ end }}
+
+                {{ if not (eq (len .reviews) 0) }}
+                <div class="row">
+                    {{ range .reviews }}
+                    <div class="col-md-12 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ .Title }}</h5>
+                                <p class="card-text">{{ .ReviewType }}</p>
+                                <a href="/reviews/{{ .Id }}" class="btn btn-dark btn-sm stretched-link">See review</a>
+                            </div>
+                        </div>
+                    </div>
+                    {{ end }}
+                </div>
+                {{ else }}
+                <div class="alert alert-info" role="alert">
+                    No reviews found.
+                </div>
+                {{ end }}
+
+            </div>
+        </div>
+    </div>
+</div>
+{{ template "globals/footer.html" . }}
+{{ end }}

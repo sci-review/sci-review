@@ -1,6 +1,7 @@
 package repo
 
 import (
+	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"sci-review/model"
 )
@@ -35,4 +36,19 @@ func (r *ReviewRepo) AddReviewer(reviewer *model.Reviewer, tx *sqlx.Tx) error {
 		return err
 	}
 	return nil
+}
+
+func (r *ReviewRepo) GetByUserId(userId uuid.UUID) (*[]model.Review, error) {
+	var reviews []model.Review
+	query := `
+		SELECT r.id, r.title, r.type, r.start_date, r.end_date, r.archived, r.created_at, r.updated_at
+		FROM reviews r
+		INNER JOIN reviewers rv ON rv.review_id = r.id
+		WHERE rv.user_id = $1
+	`
+	err := r.DB.Select(&reviews, query, userId)
+	if err != nil {
+		return nil, err
+	}
+	return &reviews, nil
 }

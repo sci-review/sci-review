@@ -67,3 +67,7 @@ func (s *ReviewService) Create(data form.ReviewCreateForm, userId uuid.UUID) (*m
 
 	return review, nil
 }
+
+func (s *ReviewService) GetByUserId(userId uuid.UUID) (*[]model.Review, error) {
+	return s.ReviewRepo.GetByUserId(userId)
+}

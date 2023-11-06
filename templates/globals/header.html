@@ -30,10 +30,10 @@
             <ul class="navbar-nav ms-auto">
                 {{ if .pageData.User }}
                 <li class="nav-item">
-                    <a class="nav-link {{if eq .pageData.Active "organizations"}}active{{end}}" href="/organizations">Organizations</a>
+                    <a class="nav-link {{if eq .pageData.Active "reviews"}}active{{end}}" href="/reviews">Reviews</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {{if eq .pageData.Active "reviews"}}active{{end}}" href="/reviews">Reviews</a>
+                    <a class="nav-link {{if eq .pageData.Active "organizations"}}active{{end}}" href="/organizations">Organizations</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/logout">Logout</a>
