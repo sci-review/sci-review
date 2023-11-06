@@ -1,6 +1,6 @@
 package form
 
-import "log/slog"
+import "golang.org/x/exp/slog"
 
 type LoginForm struct {
 	Email    string `json:"email" form:"email" validate:"required,email"`

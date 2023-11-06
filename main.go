@@ -8,7 +8,6 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
 	"golang.org/x/exp/slog"
-	"net/http"
 	"os"
 	"sci-review/handler"
 	"sci-review/repo"
@@ -57,15 +56,13 @@ func main() {
 	r.Static("/assets", "./assets")
 
 	store := cookie.NewStore([]byte(os.Getenv("SESSION_SECRET")))
-	r.Use(sessions.Sessions("mysession", store))
+	r.Use(sessions.Sessions(os.Getenv("SESSION_NAME"), store))
 
+	handler.RegisterHomeHandler(r, authMiddleware)
 	handler.RegisterAuthHandler(r, authService)
 	handler.RegisterUserHandler(r, userService)
 	handler.RegisterOrganizationHandler(r, organizationService, authMiddleware)
 
-	r.GET("/", func(c *gin.Context) {
-		c.Redirect(http.StatusMultipleChoices, "/register")
-	})
 	slog.Info("routes registered")
 
 	r.Run(os.Getenv("PORT"))
