@@ -48,3 +48,5 @@ POST http://127.0.0.1:8080/organizations/5878650d-167f-4ea4-a9c7-52d1d3401c79/ar
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTkwNTA3MzgsImlhdCI6MTY5OTA0NzEzOCwiaXNzIjoic2NpX3JldmlldyIsInJvbGUiOiJSZXZpZXdlciIsInN1YiI6ImI5YTNkOGM3LTE4YzctNGY4Zi1hNTY0LTdlMjdlMDMzN2JmYSJ9._VA1CptHeiwoc_Zbdbu_wmE5n-2vxL32gRkFnqj0Gqc
 
 
+###
+GET http://127.0.0.1:8080/organizations/new

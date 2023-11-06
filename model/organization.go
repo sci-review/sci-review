@@ -1,4 +1,4 @@
-package organization
+package model
 
 import (
 	"github.com/google/uuid"
@@ -43,7 +43,7 @@ func (o Organization) IsActiveMember(userId uuid.UUID) bool {
 
 func (o Organization) IsOwner(userId uuid.UUID) bool {
 	for _, member := range o.Members {
-		if member.UserId == userId && member.Role == Owner {
+		if member.UserId == userId && member.Role == MemberOwner {
 			return true
 		}
 	}

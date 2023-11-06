@@ -1,28 +1,31 @@
 package test
 
 import (
-	"sci-review/auth"
-	"sci-review/user"
+	"sci-review/form"
+	"sci-review/middleware"
+	"sci-review/model"
+	"sci-review/repo"
+	"sci-review/service"
 	"testing"
 )
 
 func TestAuthService_Login(t *testing.T) {
 	ClearTables()
 	db := GetDb()
-	userRepo := user.NewUserRepo(db)
-	loginAttemptRepo := auth.NewLoginAttemptRepo(db)
-	refreshTokenRepo := auth.NewRefreshTokenRepo(db)
-	authService := auth.NewAuthService(userRepo, loginAttemptRepo, refreshTokenRepo)
+	userRepo := repo.NewUserRepo(db)
+	loginAttemptRepo := repo.NewLoginAttemptRepo(db)
+	refreshTokenRepo := middleware.NewRefreshTokenRepo(db)
+	authService := service.NewAuthService(userRepo, loginAttemptRepo, refreshTokenRepo)
 
 	name := "Test test"
 	email := "teste@email.com"
 	password := "test123"
 	ipAddress := "127.0.0.1"
 	userAgent := "chrome"
-	newUser := user.NewUser(name, email, password)
+	newUser := model.NewUser(name, email, password)
 	newUser.Active = true
 	_ = userRepo.Create(newUser)
-	loginAttemptData := auth.LoginAttemptData{
+	loginAttemptData := form.LoginAttemptData{
 		Email:     email,
 		Password:  password,
 		IPAddress: ipAddress,
@@ -50,17 +53,17 @@ func TestAuthService_Login(t *testing.T) {
 func TestAuthService_Login_UserNotFound(t *testing.T) {
 	ClearTables()
 	db := GetDb()
-	userRepo := user.NewUserRepo(db)
-	loginAttemptRepo := auth.NewLoginAttemptRepo(db)
-	refreshTokenRepo := auth.NewRefreshTokenRepo(db)
-	authService := auth.NewAuthService(userRepo, loginAttemptRepo, refreshTokenRepo)
+	userRepo := repo.NewUserRepo(db)
+	loginAttemptRepo := repo.NewLoginAttemptRepo(db)
+	refreshTokenRepo := middleware.NewRefreshTokenRepo(db)
+	authService := service.NewAuthService(userRepo, loginAttemptRepo, refreshTokenRepo)
 
 	email := "teste@email.com"
 	password := "test123"
 	ipAddress := "127.0.0.1"
 	userAgent := "chrome"
 
-	loginAttemptData := auth.LoginAttemptData{
+	loginAttemptData := form.LoginAttemptData{
 		Email:     email,
 		Password:  password,
 		IPAddress: ipAddress,
@@ -76,28 +79,28 @@ func TestAuthService_Login_UserNotFound(t *testing.T) {
 		t.Error("actual token response, expect nil")
 	}
 
-	if err != user.ErrorUserNotFound {
-		t.Errorf("actual %s, expect %s", err.Error(), user.ErrorUserNotFound.Error())
+	if err != service.ErrorUserNotFound {
+		t.Errorf("actual %s, expect %s", err.Error(), service.ErrorUserNotFound.Error())
 	}
 }
 
 func TestAuthService_Login_UserNotActive(t *testing.T) {
 	ClearTables()
 	db := GetDb()
-	userRepo := user.NewUserRepo(db)
-	loginAttemptRepo := auth.NewLoginAttemptRepo(db)
-	refreshTokenRepo := auth.NewRefreshTokenRepo(db)
-	authService := auth.NewAuthService(userRepo, loginAttemptRepo, refreshTokenRepo)
+	userRepo := repo.NewUserRepo(db)
+	loginAttemptRepo := repo.NewLoginAttemptRepo(db)
+	refreshTokenRepo := middleware.NewRefreshTokenRepo(db)
+	authService := service.NewAuthService(userRepo, loginAttemptRepo, refreshTokenRepo)
 
 	name := "Test test"
 	email := "teste@email.com"
 	password := "test123"
 	ipAddress := "127.0.0.1"
 	userAgent := "chrome"
-	newUser := user.NewUser(name, email, password)
+	newUser := model.NewUser(name, email, password)
 	_ = userRepo.Create(newUser)
 
-	loginAttemptData := auth.LoginAttemptData{
+	loginAttemptData := form.LoginAttemptData{
 		Email:     email,
 		Password:  password,
 		IPAddress: ipAddress,
@@ -113,30 +116,30 @@ func TestAuthService_Login_UserNotActive(t *testing.T) {
 		t.Error("actual token response, expect nil")
 	}
 
-	if err != user.ErrorUserNotActive {
-		t.Errorf("actual %s, expect %s", err.Error(), user.ErrorUserNotActive.Error())
+	if err != service.ErrorUserNotActive {
+		t.Errorf("actual %s, expect %s", err.Error(), service.ErrorUserNotActive.Error())
 	}
 }
 
 func TestAuthService_Login_WrongPassword(t *testing.T) {
 	ClearTables()
 	db := GetDb()
-	userRepo := user.NewUserRepo(db)
-	loginAttemptRepo := auth.NewLoginAttemptRepo(db)
-	refreshTokenRepo := auth.NewRefreshTokenRepo(db)
-	authService := auth.NewAuthService(userRepo, loginAttemptRepo, refreshTokenRepo)
+	userRepo := repo.NewUserRepo(db)
+	loginAttemptRepo := repo.NewLoginAttemptRepo(db)
+	refreshTokenRepo := middleware.NewRefreshTokenRepo(db)
+	authService := service.NewAuthService(userRepo, loginAttemptRepo, refreshTokenRepo)
 
 	name := "Test test"
 	email := "teste@email.com"
 	password := "test123"
 	ipAddress := "127.0.0.1"
 	userAgent := "chrome"
-	newUser := user.NewUser(name, email, password)
+	newUser := model.NewUser(name, email, password)
 
 	_ = userRepo.Create(newUser)
 
 	wrongPassword := "wrongPassword"
-	loginAttemptData := auth.LoginAttemptData{
+	loginAttemptData := form.LoginAttemptData{
 		Email:     email,
 		Password:  wrongPassword,
 		IPAddress: ipAddress,

@@ -1,16 +1,18 @@
-package user
+package handler
 
 import (
 	"github.com/gin-gonic/gin"
 	"golang.org/x/exp/slog"
 	"sci-review/common"
+	"sci-review/form"
+	"sci-review/service"
 )
 
 type UserHandler struct {
-	UserService *UserService
+	UserService *service.UserService
 }
 
-func NewUserHandler(userService *UserService) *UserHandler {
+func NewUserHandler(userService *service.UserService) *UserHandler {
 	return &UserHandler{UserService: userService}
 }
 
@@ -19,7 +21,7 @@ func (uh *UserHandler) Create(c *gin.Context) {
 		Title:  "Register",
 		Active: "register",
 	}
-	userCreateForm := new(UserCreateForm)
+	userCreateForm := new(form.UserCreateForm)
 	if err := c.ShouldBind(&userCreateForm); err != nil {
 		slog.Warn("user create", "error", err.Error())
 		pageData.Message = "Invalid form data"
@@ -63,7 +65,7 @@ func (uh *UserHandler) CreateForm(c *gin.Context) {
 	})
 }
 
-func Register(r *gin.Engine, userService *UserService) {
+func RegisterUserHandler(r *gin.Engine, userService *service.UserService) {
 	slog.Info("user handler", "status", "registering")
 	userHandle := NewUserHandler(userService)
 	r.GET("/register", userHandle.CreateForm)

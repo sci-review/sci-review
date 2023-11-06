@@ -1,9 +1,10 @@
-package organization
+package repo
 
 import (
 	"errors"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"sci-review/model"
 	"time"
 )
 
@@ -16,21 +17,21 @@ func NewOrganizationRepo(DB *sqlx.DB) *OrganizationRepo {
 }
 
 type OrgAndMember struct {
-	OrgId           uuid.UUID  `db:"org_id"`
-	OrgName         string     `db:"org_name"`
-	OrgDesc         string     `db:"org_description"`
-	OrgArchived     bool       `db:"org_archived"`
-	OrgCreatedAt    time.Time  `db:"org_created_at"`
-	OrgUpdatedAt    time.Time  `db:"org_updated_at"`
-	MemberId        uuid.UUID  `db:"member_id"`
-	MemberUserId    uuid.UUID  `db:"member_user_id"`
-	MemberRole      MemberRole `db:"member_role"`
-	MemberActive    bool       `db:"member_active"`
-	MemberCreatedAt time.Time  `db:"member_created_at"`
-	MemberUpdatedAt time.Time  `db:"member_updated_at"`
+	OrgId           uuid.UUID        `db:"org_id"`
+	OrgName         string           `db:"org_name"`
+	OrgDesc         string           `db:"org_description"`
+	OrgArchived     bool             `db:"org_archived"`
+	OrgCreatedAt    time.Time        `db:"org_created_at"`
+	OrgUpdatedAt    time.Time        `db:"org_updated_at"`
+	MemberId        uuid.UUID        `db:"member_id"`
+	MemberUserId    uuid.UUID        `db:"member_user_id"`
+	MemberRole      model.MemberRole `db:"member_role"`
+	MemberActive    bool             `db:"member_active"`
+	MemberCreatedAt time.Time        `db:"member_created_at"`
+	MemberUpdatedAt time.Time        `db:"member_updated_at"`
 }
 
-func (or *OrganizationRepo) Create(organization *Organization, tx *sqlx.Tx) error {
+func (or *OrganizationRepo) Create(organization *model.Organization, tx *sqlx.Tx) error {
 	query := `
 		INSERT INTO organizations (id, name, description, archived, created_at, updated_at)
 		VALUES (:id, :name, :description, false, :created_at, :updated_at)
@@ -42,7 +43,7 @@ func (or *OrganizationRepo) Create(organization *Organization, tx *sqlx.Tx) erro
 	return nil
 }
 
-func (or *OrganizationRepo) AddMember(member *Member, tx *sqlx.Tx) error {
+func (or *OrganizationRepo) AddMember(member *model.Member, tx *sqlx.Tx) error {
 	query := `
 		INSERT INTO members (id, user_id, organization_id, role, active, created_at, updated_at)
 		VALUES (:id, :user_id, :organization_id, :role, :active, :created_at, :updated_at)
@@ -63,7 +64,7 @@ func (or *OrganizationRepo) Archive(id uuid.UUID) error {
 	return nil
 }
 
-func (or *OrganizationRepo) FindAllByUserId(userId uuid.UUID) ([]Organization, error) {
+func (or *OrganizationRepo) FindAllByUserId(userId uuid.UUID) ([]model.Organization, error) {
 	var organizationJoinMember []OrgAndMember
 	query := `
 		SELECT o.id AS org_id, o.name AS org_name, o.description AS org_description, o.created_at AS org_created_at,
@@ -80,7 +81,7 @@ func (or *OrganizationRepo) FindAllByUserId(userId uuid.UUID) ([]Organization, e
 	return convertToOrganizations(organizationJoinMember), nil
 }
 
-func (or *OrganizationRepo) GetById(id uuid.UUID) (*Organization, error) {
+func (or *OrganizationRepo) GetById(id uuid.UUID) (*model.Organization, error) {
 	var orgAndMember []OrgAndMember
 	query := `
 		SELECT o.id AS org_id, o.name AS org_name, o.description AS org_description, o.created_at AS org_created_at,
@@ -104,22 +105,22 @@ func (or *OrganizationRepo) GetById(id uuid.UUID) (*Organization, error) {
 	return &organizations[0], nil
 }
 
-func convertToOrganizations(organizationMembers []OrgAndMember) []Organization {
-	organizationMap := make(map[uuid.UUID]*Organization)
+func convertToOrganizations(organizationMembers []OrgAndMember) []model.Organization {
+	organizationMap := make(map[uuid.UUID]*model.Organization)
 	for _, orgmember := range organizationMembers {
 		if _, ok := organizationMap[orgmember.OrgId]; !ok {
-			organization := &Organization{}
+			organization := &model.Organization{}
 			organization.Id = orgmember.OrgId
 			organization.Name = orgmember.OrgName
 			organization.Description = orgmember.OrgDesc
 			organization.Archived = orgmember.OrgArchived
 			organization.CreatedAt = orgmember.OrgCreatedAt
 			organization.UpdatedAt = orgmember.OrgUpdatedAt
-			organization.Members = []Member{}
+			organization.Members = []model.Member{}
 			organizationMap[orgmember.OrgId] = organization
 		}
 		organization := organizationMap[orgmember.OrgId]
-		member := Member{
+		member := model.Member{
 			Id:             orgmember.MemberId,
 			UserId:         orgmember.MemberUserId,
 			OrganizationId: orgmember.OrgId,
@@ -131,7 +132,7 @@ func convertToOrganizations(organizationMembers []OrgAndMember) []Organization {
 		organization.AddMember(member)
 	}
 
-	var organizations []Organization
+	var organizations []model.Organization
 	for _, org := range organizationMap {
 		organizations = append(organizations, *org)
 	}

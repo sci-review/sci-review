@@ -1,0 +1,112 @@
+{{ define "organizations/index.html" }}
+{{ template "globals/header.html" . }}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div style="display: flex; justify-content: space-between; align-items: center">
+                <h2>{{ .pageData.Title }}</h2>
+                <a href="/organizations/new" class="btn btn-dark btn-sm">New Organization</a>
+            </div>
+            <hr>
+            <div>
+                {{ if .pageData.Message }}
+                <div class="alert alert-danger" role="alert">
+                    {{ .pageData.Message }}
+                </div>
+                {{ end }}
+<!--                {{ if .organizations }}-->
+
+<!--                    <table class="table table-striped table-sm">-->
+<!--                        <thead>-->
+<!--                            <tr>-->
+<!--                                <th>Name</th>-->
+<!--                                <th>Description</th>-->
+<!--                                <th>Created</th>-->
+<!--                                <th>Updated</th>-->
+<!--                                <th></th>-->
+<!--                            </tr>-->
+<!--                        </thead>-->
+<!--                        <tbody>-->
+<!--                            {{ range .organizations }}-->
+<!--                            <tr>-->
+<!--                                <td>{{ .Name }}</td>-->
+<!--                                <td>{{ .Description }}</td>-->
+<!--                                <td>{{ .CreatedAt }}</td>-->
+<!--                                <td>{{ .UpdatedAt }}</td>-->
+<!--                                <td>-->
+<!--                                    <a href="/organizations/{{ .Id }}/edit" class="btn btn-dark btn-sm">Edit</a>-->
+<!--                                    <a href="/organizations/{{ .Id }}/delete" class="btn btn-danger btn-sm">Delete</a>-->
+<!--                                </td>-->
+<!--                            </tr>-->
+<!--                            {{ end }}-->
+<!--                        </tbody>-->
+<!--                    </table>-->
+
+<!--                {{ else }}-->
+
+<!--                    <div class="alert alert-info" role="alert">-->
+<!--                        No organizations found.-->
+<!--                    </div>-->
+
+<!--                {{ end }}-->
+
+
+
+<!--                {{ if .organizations }}-->
+<!--                <div class="row">-->
+<!--                    {{ range .organizations }}-->
+<!--                    <div class="col-md-4">-->
+<!--                        <div class="card mb-4">-->
+<!--                            <div class="card-body">-->
+<!--                                <h5 class="card-title">{{ .Name }}</h5>-->
+<!--                                <p class="card-text">{{ .Description }}</p>-->
+<!--                                <p class="card-text"><strong>Created:</strong> {{ .CreatedAt }}</p>-->
+<!--                                <p class="card-text"><strong>Updated:</strong> {{ .UpdatedAt }}</p>-->
+<!--                                <a href="/organizations/{{ .Id }}/edit" class="btn btn-dark btn-sm">Edit</a>-->
+<!--                                <a href="/organizations/{{ .Id }}/delete" class="btn btn-danger btn-sm">Delete</a>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                    {{ end }}-->
+<!--                </div>-->
+<!--                {{ else }}-->
+<!--                <div class="alert alert-info" role="alert">-->
+<!--                    No organizations found.-->
+<!--                </div>-->
+<!--                {{ end }}-->
+
+
+
+                {{ if .organizations }}
+                <div class="row">
+                    {{ range .organizations }}
+                    <div class="col-md-12">
+                        <div class="card mb-12">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ .Name }}</h5>
+                                <p class="card-text">{{ .Description }}</p>
+                                <strong>Members:</strong>
+                                <ul>
+                                    {{ range .Members }}
+                                    <li>{{ .UserId }}</li>
+                                    {{ end }}
+                                </ul>
+                                <a href="/organizations/{{ .Id }}/edit" class="btn btn-dark btn-sm">Edit</a>
+                                <a href="/organizations/{{ .Id }}/delete" class="btn btn-danger btn-sm">Delete</a>
+                            </div>
+                        </div>
+                    </div>
+                    {{ end }}
+                </div>
+                {{ else }}
+                <div class="alert alert-info" role="alert">
+                    No organizations found.
+                </div>
+                {{ end }}
+
+            </div>
+        </div>
+    </div>
+</div>
+{{ template "globals/footer.html" . }}
+{{ end }}

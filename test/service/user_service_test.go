@@ -2,20 +2,23 @@ package test
 
 import (
 	_ "github.com/jackc/pgx/v5/stdlib"
-	"sci-review/user"
+	"sci-review/form"
+	"sci-review/model"
+	"sci-review/repo"
+	"sci-review/service"
 	"testing"
 )
 
 func TestUserService_Create(t *testing.T) {
 	ClearTables()
-	userRepo := user.NewUserRepo(GetDb())
-	userService := user.NewUserService(userRepo)
+	userRepo := repo.NewUserRepo(GetDb())
+	userService := service.NewUserService(userRepo)
 
 	name := "Test test"
 	email := "teste@email.com"
 	password := "test123"
 
-	userCreateForm := user.UserCreateForm{
+	userCreateForm := form.UserCreateForm{
 		Name:     name,
 		Email:    email,
 		Password: password,
@@ -39,16 +42,16 @@ func TestUserService_Create(t *testing.T) {
 
 func TestUserService_Create_UserAlreadyExists(t *testing.T) {
 	ClearTables()
-	userRepo := user.NewUserRepo(GetDb())
-	userService := user.NewUserService(userRepo)
+	userRepo := repo.NewUserRepo(GetDb())
+	userService := service.NewUserService(userRepo)
 
 	name := "Test test"
 	email := "teste@email.com"
 	password := "test123"
 
-	_ = userRepo.Create(user.NewUser(name, email, password))
+	_ = userRepo.Create(model.NewUser(name, email, password))
 
-	userCreateForm := user.UserCreateForm{
+	userCreateForm := form.UserCreateForm{
 		Name:     name,
 		Email:    email,
 		Password: password,
@@ -64,7 +67,7 @@ func TestUserService_Create_UserAlreadyExists(t *testing.T) {
 		t.Error("actual nil, expect error")
 	}
 
-	if err != user.ErrorUserAlreadyExists {
-		t.Errorf("actual %s, expect %s", err.Error(), user.ErrorUserAlreadyExists.Error())
+	if err != service.ErrorUserAlreadyExists {
+		t.Errorf("actual %s, expect %s", err.Error(), service.ErrorUserAlreadyExists.Error())
 	}
 }

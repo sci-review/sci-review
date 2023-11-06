@@ -1,21 +1,24 @@
-package organization
+package service
 
 import (
 	"github.com/google/uuid"
 	"golang.org/x/exp/slog"
 	"sci-review/common"
+	"sci-review/form"
+	"sci-review/model"
+	"sci-review/repo"
 )
 
 type OrganizationService struct {
-	OrganizationRepo *OrganizationRepo
+	OrganizationRepo *repo.OrganizationRepo
 }
 
-func NewOrganizationService(organizationRepo *OrganizationRepo) *OrganizationService {
+func NewOrganizationService(organizationRepo *repo.OrganizationRepo) *OrganizationService {
 	return &OrganizationService{OrganizationRepo: organizationRepo}
 }
 
-func (os *OrganizationService) Create(data OrganizationCreateForm, userId uuid.UUID) (*Organization, error) {
-	organization := NewOrganization(data.Name, data.Description)
+func (os *OrganizationService) Create(data form.OrganizationCreateForm, userId uuid.UUID) (*model.Organization, error) {
+	organization := model.NewOrganization(data.Name, data.Description)
 
 	tx := os.OrganizationRepo.DB.MustBegin()
 
@@ -29,7 +32,7 @@ func (os *OrganizationService) Create(data OrganizationCreateForm, userId uuid.U
 		return nil, common.DbInternalError
 	}
 
-	member := NewMember(userId, organization.Id, Owner, true)
+	member := model.NewMember(userId, organization.Id, model.MemberOwner, true)
 	if err := os.OrganizationRepo.AddMember(member, tx); err != nil {
 		err := tx.Rollback()
 		if err != nil {
@@ -50,7 +53,7 @@ func (os *OrganizationService) Create(data OrganizationCreateForm, userId uuid.U
 	return organization, nil
 }
 
-func (os *OrganizationService) List(id uuid.UUID) ([]Organization, error) {
+func (os *OrganizationService) List(id uuid.UUID) ([]model.Organization, error) {
 	organizations, err := os.OrganizationRepo.FindAllByUserId(id)
 	if err != nil {
 		slog.Error("organization list", "error", err.Error())
@@ -62,7 +65,7 @@ func (os *OrganizationService) List(id uuid.UUID) ([]Organization, error) {
 	return organizations, nil
 }
 
-func (os *OrganizationService) Get(id uuid.UUID, userId uuid.UUID) (*Organization, error) {
+func (os *OrganizationService) Get(id uuid.UUID, userId uuid.UUID) (*model.Organization, error) {
 	organization, err := os.OrganizationRepo.GetById(id)
 	if err != nil {
 		slog.Error("organization get", "error", err.Error())

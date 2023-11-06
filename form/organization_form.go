@@ -1,10 +1,10 @@
-package organization
+package form
 
 import "golang.org/x/exp/slog"
 
 type OrganizationCreateForm struct {
-	Name        string `json:"name" validate:"required,min=3,max=255"`
-	Description string `json:"description"`
+	Name        string `json:"name" form:"name" validate:"required,min=3,max=255"`
+	Description string `json:"description" form:"description"`
 }
 
 func (ocf OrganizationCreateForm) LogValue() slog.Value {

@@ -1,18 +1,17 @@
-package auth
+package model
 
 import (
 	"github.com/google/uuid"
-	"sci-review/user"
 )
 
 type Principal struct {
 	Id   uuid.UUID `json:"id"`
-	Role user.Role `json:"role"`
+	Role Role      `json:"role"`
 }
 
 func NewPrincipal(id string, role string) *Principal {
 	return &Principal{
 		Id:   uuid.MustParse(id),
-		Role: user.Role(role),
+		Role: Role(role),
 	}
 }

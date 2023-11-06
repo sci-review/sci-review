@@ -1,13 +1,16 @@
-package user
+package service
 
 import (
 	"errors"
 	"golang.org/x/exp/slog"
 	"sci-review/common"
+	"sci-review/form"
+	"sci-review/model"
+	"sci-review/repo"
 )
 
 type UserService struct {
-	UserRepo *UserRepo
+	UserRepo *repo.UserRepo
 }
 
 var (
@@ -16,18 +19,18 @@ var (
 	ErrorUserNotActive     = errors.New("user not active")
 )
 
-func NewUserService(userRepo *UserRepo) *UserService {
+func NewUserService(userRepo *repo.UserRepo) *UserService {
 	return &UserService{UserRepo: userRepo}
 }
 
-func (us *UserService) Create(userCreateForm UserCreateForm) (*User, error) {
+func (us *UserService) Create(userCreateForm form.UserCreateForm) (*model.User, error) {
 	userFounded, _ := us.UserRepo.GetByEmail(userCreateForm.Email)
 	if userFounded != nil {
 		slog.Warn("user create", "error", "user already exists", "userData", userCreateForm)
 		return nil, ErrorUserAlreadyExists
 	}
 
-	user := NewUser(userCreateForm.Name, userCreateForm.Email, userCreateForm.Password)
+	user := model.NewUser(userCreateForm.Name, userCreateForm.Email, userCreateForm.Password)
 	err := us.UserRepo.Create(user)
 	if err != nil {
 		slog.Error("user create", "error", err.Error(), "userData", userCreateForm)

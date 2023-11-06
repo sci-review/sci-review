@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
@@ -8,9 +10,9 @@ import (
 	"golang.org/x/exp/slog"
 	"net/http"
 	"os"
-	"sci-review/auth"
-	"sci-review/organization"
-	"sci-review/user"
+	"sci-review/handler"
+	"sci-review/repo"
+	"sci-review/service"
 )
 
 func main() {
@@ -39,42 +41,30 @@ func main() {
 	}
 	slog.Info("database connected established")
 
-	userRepo := user.NewUserRepo(db)
-	userService := user.NewUserService(userRepo)
-	refreshTokenRepo := auth.NewRefreshTokenRepo(db)
-	loginAttemptRepo := auth.NewLoginAttemptRepo(db)
-	authService := auth.NewAuthService(userRepo, loginAttemptRepo, refreshTokenRepo)
-	organizationRepo := organization.NewOrganizationRepo(db)
-	organizationService := organization.NewOrganizationService(organizationRepo)
+	userRepo := repo.NewUserRepo(db)
+	userService := service.NewUserService(userRepo)
+	loginAttemptRepo := repo.NewLoginAttemptRepo(db)
+	authService := service.NewAuthService(userRepo, loginAttemptRepo)
+	organizationRepo := repo.NewOrganizationRepo(db)
+	organizationService := service.NewOrganizationService(organizationRepo)
 	slog.Info("services initialized")
 
-	jwtMiddleware := auth.JwtMiddleware()
+	authMiddleware := handler.AuthMiddleware()
 	slog.Info("middleware initialized")
 
 	r := gin.Default()
 	r.LoadHTMLGlob("templates/**/*")
 	r.Static("/assets", "./assets")
 
-	auth.Register(r, authService)
-	user.Register(r, userService)
-	organization.Register(r, organizationService, jwtMiddleware)
+	store := cookie.NewStore([]byte(os.Getenv("SESSION_SECRET")))
+	r.Use(sessions.Sessions("mysession", store))
+
+	handler.RegisterAuthHandler(r, authService)
+	handler.RegisterUserHandler(r, userService)
+	handler.RegisterOrganizationHandler(r, organizationService, authMiddleware)
 
 	r.GET("/", func(c *gin.Context) {
 		c.Redirect(http.StatusMultipleChoices, "/register")
-	})
-
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "pong",
-		})
-	})
-
-	r.GET("/protected", jwtMiddleware, func(c *gin.Context) {
-		principal := c.MustGet("principal").(*auth.Principal)
-		c.JSON(http.StatusOK, gin.H{
-			"message":   "protected route",
-			"principal": principal,
-		})
 	})
 	slog.Info("routes registered")
 

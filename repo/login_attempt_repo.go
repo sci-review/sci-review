@@ -1,7 +1,8 @@
-package auth
+package repo
 
 import (
 	"github.com/jmoiron/sqlx"
+	"sci-review/model"
 )
 
 type LoginAttemptRepo struct {
@@ -12,7 +13,7 @@ func NewLoginAttemptRepo(DB *sqlx.DB) *LoginAttemptRepo {
 	return &LoginAttemptRepo{DB: DB}
 }
 
-func (lar LoginAttemptRepo) Log(loginAttempt *LoginAttempt, tx *sqlx.Tx) error {
+func (lar LoginAttemptRepo) Log(loginAttempt *model.LoginAttempt, tx *sqlx.Tx) error {
 	query := `
 		INSERT INTO login_attempts (id, user_id, email, success, ip_address, user_agent, timestamp)
 		VALUES (:id, :user_id, :email, :success, :ip_address, :user_agent, :timestamp)
