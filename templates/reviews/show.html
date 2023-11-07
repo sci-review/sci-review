@@ -1,6 +1,6 @@
 {{ define "reviews/show.html" }}
 {{ template "globals/header.html" . }}
-<div class="container">
+<div class="container-fluid">
     <div class="row">
         <div class="col-md-12">
             <div>
@@ -17,6 +17,107 @@
             </div>
         </div>
     </div>
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <ul class="nav nav-underline">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="#">Preliminary Investigations</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Protocol</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Screening and Selection</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Data Extraction</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Quality Assessment</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Reporting</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 mb-3">
+            <a href="/reviews/{{ .review.Id }}/preliminary_investigations/create"
+               class="btn btn-dark btn-sm">New Investigation Question</a>
+
+            <a style="color: black" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button" aria-controls="offcanvasExample">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-question-circle-fill" viewBox="0 0 16 16">
+                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.496 6.033h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286a.237.237 0 0 0 .241.247zm2.325 6.443c.61 0 1.029-.394 1.029-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94 0 .533.425.927 1.01.927z"/>
+                </svg>
+            </a>
+        </div>
+        {{ if not (eq (len .investigations) 0) }}
+        <div class="col-md-12">
+            {{ range .investigations }}
+            <div class="card mb-2">
+                <div class="card-body">
+                    <p class="card-title fw-medium">Question</p>
+                    <p class="card-text">{{ .Question }}</p>
+                    <a href="/reviews/{{ .ReviewId }}/preliminary_investigations/{{ .Id }}" class="stretched-link"></a>
+                </div>
+            </div>
+            {{ end }}
+        </div>
+        {{ else }}
+        <div class="col-md-12">
+            <div class="alert alert-warning" role="alert">
+                Before you start defining the protocol, you can create an initial investigation.
+                <a style="color: black" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button" aria-controls="offcanvasExample">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-question-circle-fill" viewBox="0 0 16 16">
+                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.496 6.033h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286a.237.237 0 0 0 .241.247zm2.325 6.443c.61 0 1.029-.394 1.029-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94 0 .533.425.927 1.01.927z"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+        {{ end }}
+    </div>
 </div>
+
+
+<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasExampleLabel">Preliminary Investigation</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <p>
+            This refers to the initial exploration and understanding of a subject or area of interest before
+            formally embarking on the research process. It involves:
+        </p>
+
+        <h6>Objectives</h6>
+        <ul>
+            <li>Establish and confirm the need for a new review, or an update for an existing review;</li>
+            <li>Finalize research topic, formulate the problem and question(s);</li>
+            <li>Develop conceptual framework, inclusion/exclusion criteria and protocol;</li>
+            <li>Avoid duplication of research effort</li>
+        </ul>
+
+        <h6>Tasks</h6>
+        <ul>
+            <li>Define a initial question;</li>
+            <li>Identify all published systematic reviews on the topic;</li>
+            <li>Identify all registered systematic reviews on the topic;</li>
+            <li>Identify the main concepts of the question;</li>
+            <li>Identify the main keywords of the question;</li>
+            <li>Run pilot searches in different databases to establish breadth and depth of published research on the topic</li>
+        </ul>
+
+        <h6>References</h6>
+        <ul>
+            <li><a href="https://library.cumc.columbia.edu/kb/preliminary-topic-investigation-systematic-reviews" target="_blank">Preliminary topic investigation for systematic reviews</a></li>
+            <li><a href="https://library.cumc.columbia.edu/kb/planning-systematic-review" target="_blank">Planning a systematic review</a></li>
+        </ul>
+
+
+    </div>
+</div>
+
 {{ template "globals/footer.html" . }}
 {{ end }}

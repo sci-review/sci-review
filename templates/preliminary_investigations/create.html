@@ -1,0 +1,38 @@
+{{ define "preliminary_investigations/create.html" }}
+{{ template "globals/header.html" . }}
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <h2>{{ .pageData.Title }}</h2>
+            <hr>
+            <div>
+                {{ if .pageData.Message }}
+                <div class="alert alert-danger" role="alert">
+                    {{ .pageData.Message }}
+                </div>
+                {{ end }}
+                {{ if .pageData.Errors }}
+                <div class="alert alert-danger" role="alert">
+                    <ul>
+                        {{ range $key, $value := .pageData.Errors }}
+                        <li>{{ $value.Error }}</li>
+                        {{ end }}
+                    </ul>
+                </div>
+                {{ end }}
+                <form action="/reviews/{{ .review.Id }}/preliminary_investigations/create" method="post">
+                    <input type="hidden" name="CSRF" value="" />
+                    <div class="mb-3">
+                        <label for="question" class="form-label">Question</label>
+                        <textarea rows="3" class="form-control" id="question" name="question">{{ .preliminaryInvestigationForm.Question }}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <button type="submit" class="btn btn-dark btn-sm">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{{ template "globals/footer.html" . }}
+{{ end }}

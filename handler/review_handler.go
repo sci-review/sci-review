@@ -11,11 +11,12 @@ import (
 )
 
 type ReviewHandler struct {
-	ReviewService *service.ReviewService
+	ReviewService                   *service.ReviewService
+	PreliminaryInvestigationService *service.PreliminaryInvestigationService
 }
 
-func NewReviewHandler(reviewService *service.ReviewService) *ReviewHandler {
-	return &ReviewHandler{ReviewService: reviewService}
+func NewReviewHandler(reviewService *service.ReviewService, preliminaryInvestigationService *service.PreliminaryInvestigationService) *ReviewHandler {
+	return &ReviewHandler{ReviewService: reviewService, PreliminaryInvestigationService: preliminaryInvestigationService}
 }
 
 func (rh *ReviewHandler) CreateForm(c *gin.Context) {
@@ -107,6 +108,11 @@ func (rh *ReviewHandler) Show(c *gin.Context) {
 		return
 	}
 
+	investigations, err := rh.PreliminaryInvestigationService.GetAllByReviewID(review.Id)
+	if err != nil {
+		return
+	}
+
 	pageData := common.PageData{
 		Title:  "Review",
 		Active: "reviews",
@@ -114,13 +120,19 @@ func (rh *ReviewHandler) Show(c *gin.Context) {
 	}
 
 	c.HTML(200, "reviews/show.html", gin.H{
-		"pageData": pageData,
-		"review":   review,
+		"pageData":       pageData,
+		"review":         review,
+		"investigations": investigations,
 	})
 }
 
-func RegisterReviewHandler(r *gin.Engine, reviewService *service.ReviewService, middleware gin.HandlerFunc) {
-	reviewHandler := NewReviewHandler(reviewService)
+func RegisterReviewHandler(
+	r *gin.Engine,
+	reviewService *service.ReviewService,
+	preliminaryInvestigationService *service.PreliminaryInvestigationService,
+	middleware gin.HandlerFunc,
+) {
+	reviewHandler := NewReviewHandler(reviewService, preliminaryInvestigationService)
 	r.GET("/reviews", middleware, reviewHandler.Index)
 	r.GET("/reviews/new", middleware, reviewHandler.CreateForm)
 	r.POST("/reviews/new", middleware, reviewHandler.Create)

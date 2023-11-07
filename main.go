@@ -48,6 +48,8 @@ func main() {
 	organizationService := service.NewOrganizationService(organizationRepo)
 	reviewRepo := repo.NewReviewRepo(db)
 	reviewService := service.NewReviewService(reviewRepo)
+	preliminaryInvestigationRepo := repo.NewPreliminaryInvestigationRepo(db)
+	preliminaryInvestigationService := service.NewPreliminaryInvestigationService(preliminaryInvestigationRepo)
 	slog.Info("services initialized")
 
 	authMiddleware := handler.AuthMiddleware()
@@ -64,7 +66,8 @@ func main() {
 	handler.RegisterAuthHandler(r, authService)
 	handler.RegisterUserHandler(r, userService)
 	handler.RegisterOrganizationHandler(r, organizationService, authMiddleware)
-	handler.RegisterReviewHandler(r, reviewService, authMiddleware)
+	handler.RegisterReviewHandler(r, reviewService, preliminaryInvestigationService, authMiddleware)
+	handler.RegisterPreliminaryInvestigationHandler(r, reviewService, preliminaryInvestigationService, authMiddleware)
 
 	slog.Info("routes registered")
 
