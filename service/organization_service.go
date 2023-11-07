@@ -60,8 +60,6 @@ func (os *OrganizationService) List(id uuid.UUID) ([]model.Organization, error) 
 		return nil, common.DbInternalError
 	}
 
-	slog.Info("organization list", "result", "success", "organizations", organizations)
-
 	return organizations, nil
 }
 

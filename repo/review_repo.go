@@ -52,3 +52,18 @@ func (r *ReviewRepo) GetByUserId(userId uuid.UUID) (*[]model.Review, error) {
 	}
 	return &reviews, nil
 }
+
+func (r *ReviewRepo) GetByIdAndUserId(id uuid.UUID, userId uuid.UUID) (*model.Review, error) {
+	review := model.Review{}
+	query := `
+		SELECT r.id, r.title, r.type, r.start_date, r.end_date, r.archived, r.created_at, r.updated_at
+		FROM reviews r
+		INNER JOIN reviewers rv ON rv.review_id = r.id
+		WHERE r.id = $1 AND rv.user_id = $2
+	`
+	err := r.DB.Get(&review, query, id, userId)
+	if err != nil {
+		return nil, err
+	}
+	return &review, nil
+}

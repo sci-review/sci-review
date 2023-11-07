@@ -22,6 +22,7 @@ var (
 	ErrorParseStartDate = errors.New("start date must be in format YYYY-MM-DD")
 	ErrorParseEndDate   = errors.New("end date must be in format YYYY-MM-DD")
 	ErrorReviewDate     = errors.New("end date must be after start date")
+	ErrorReviewNotFound = errors.New("review not found")
 )
 
 func (s *ReviewService) Create(data form.ReviewCreateForm, userId uuid.UUID) (*model.Review, error) {
@@ -70,4 +71,12 @@ func (s *ReviewService) Create(data form.ReviewCreateForm, userId uuid.UUID) (*m
 
 func (s *ReviewService) GetByUserId(userId uuid.UUID) (*[]model.Review, error) {
 	return s.ReviewRepo.GetByUserId(userId)
+}
+
+func (s *ReviewService) GetById(id uuid.UUID, userId uuid.UUID) (*model.Review, error) {
+	review, err := s.ReviewRepo.GetByIdAndUserId(id, userId)
+	if err != nil {
+		return nil, ErrorReviewNotFound
+	}
+	return review, nil
 }

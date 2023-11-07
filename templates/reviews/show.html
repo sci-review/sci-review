@@ -1,0 +1,22 @@
+{{ define "reviews/show.html" }}
+{{ template "globals/header.html" . }}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div>
+                <h2>{{ .review.Title }}</h2>
+                <p>{{ .review.ReviewType }}</p>
+            </div>
+            <hr>
+            <div>
+                {{ if .pageData.Message }}
+                <div class="alert alert-danger" role="alert">
+                    {{ .pageData.Message }}
+                </div>
+                {{ end }}
+            </div>
+        </div>
+    </div>
+</div>
+{{ template "globals/footer.html" . }}
+{{ end }}

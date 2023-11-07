@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"golang.org/x/exp/slog"
 	"sci-review/common"
 	"sci-review/form"
@@ -86,11 +86,36 @@ func (rh *ReviewHandler) Index(c *gin.Context) {
 		return
 	}
 
-	fmt.Println(reviews)
-
 	c.HTML(200, "reviews/index.html", gin.H{
 		"pageData": pageData,
 		"reviews":  reviews,
+	})
+}
+
+func (rh *ReviewHandler) Show(c *gin.Context) {
+	principal := c.MustGet("principal").(*model.Principal)
+
+	id, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		c.Redirect(302, "/reviews")
+		return
+	}
+
+	review, err := rh.ReviewService.GetById(id, principal.Id)
+	if err != nil {
+		c.Redirect(302, "/reviews")
+		return
+	}
+
+	pageData := common.PageData{
+		Title:  "Review",
+		Active: "reviews",
+		User:   principal,
+	}
+
+	c.HTML(200, "reviews/show.html", gin.H{
+		"pageData": pageData,
+		"review":   review,
 	})
 }
 
@@ -99,4 +124,5 @@ func RegisterReviewHandler(r *gin.Engine, reviewService *service.ReviewService, 
 	r.GET("/reviews", middleware, reviewHandler.Index)
 	r.GET("/reviews/new", middleware, reviewHandler.CreateForm)
 	r.POST("/reviews/new", middleware, reviewHandler.Create)
+	r.GET("/reviews/:id", middleware, reviewHandler.Show)
 }
