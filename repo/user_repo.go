@@ -43,3 +43,32 @@ func (ur *UserRepo) GetById(id uuid.UUID) (*model.User, error) {
 	}
 	return &user, nil
 }
+
+func (ur *UserRepo) FindAll() (*[]model.User, error) {
+	var users []model.User
+	query := `SELECT * FROM users ORDER by created_at DESC`
+	err := ur.DB.Select(&users, query)
+	if err != nil {
+		return nil, err
+	}
+	return &users, nil
+}
+
+func (ur *UserRepo) Update(user *model.User) error {
+	query := `
+		UPDATE users 
+		SET 
+			name = :name, 
+			email = :email, 
+			password = :password,
+			role = :role, 
+			active = :active, 
+			updated_at = :updated_at 
+		WHERE id = :id;
+	`
+	_, err := ur.DB.NamedExec(query, user)
+	if err != nil {
+		return err
+	}
+	return nil
+}

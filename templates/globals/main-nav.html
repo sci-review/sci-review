@@ -14,9 +14,25 @@
                 <li class="nav-item">
                     <a class="nav-link {{if eq .pageData.Active "organizations"}}active{{end}}" href="/organizations">Organizations</a>
                 </li>
+                {{ if eq .pageData.User.Role "UserReviewer" }}
                 <li class="nav-item">
                     <a class="nav-link" href="/logout">Logout</a>
                 </li>
+                {{ end }}
+
+                {{ if eq .pageData.User.Role "UserAdmin" }}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle {{if eq .pageData.Active "admin"}}active{{end}}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Admin
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/users">Users</a></li>
+                        <li><a class="dropdown-item" href="/config">Configuration</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/logout">Logout</a></li>
+                    </ul>
+                </li>          
+                {{ end }}
                 {{ else }}
                 <li class="nav-item">
                     <a class="nav-link {{if eq .pageData.Active "register"}}active{{end}}" href="/register">Register</a>

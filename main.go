@@ -53,6 +53,7 @@ func main() {
 	slog.Info("services initialized")
 
 	authMiddleware := handler.AuthMiddleware()
+	adminMiddleware := handler.AdminMiddleware()
 	slog.Info("middleware initialized")
 
 	r := gin.Default()
@@ -65,6 +66,7 @@ func main() {
 	handler.RegisterHomeHandler(r, authMiddleware)
 	handler.RegisterAuthHandler(r, authService)
 	handler.RegisterUserHandler(r, userService)
+	handler.RegisterAdminHandler(r, userService, authMiddleware, adminMiddleware)
 	handler.RegisterOrganizationHandler(r, organizationService, authMiddleware)
 	handler.RegisterReviewHandler(r, reviewService, preliminaryInvestigationService, authMiddleware)
 	handler.RegisterPreliminaryInvestigationHandler(r, reviewService, preliminaryInvestigationService, authMiddleware)
