@@ -14,6 +14,7 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		if userId == nil || userRole == nil {
 			c.Redirect(302, "/login")
+			c.Abort()
 			return
 		}
 
