@@ -131,6 +131,11 @@ func (pi *PreliminaryInvestigationHandler) Show(c *gin.Context) {
 		return
 	}
 
+	keywords, err := pi.PreliminaryInvestigationService.GetKeywordsByInvestigationId(investigationId)
+	if err != nil {
+		return
+	}
+
 	pageData := common.PageData{
 		Title:  "Preliminary Investigation",
 		Active: "reviews",
@@ -141,7 +146,91 @@ func (pi *PreliminaryInvestigationHandler) Show(c *gin.Context) {
 		"pageData":      pageData,
 		"review":        review,
 		"investigation": investigation,
+		"keywords":      keywords,
 	})
+}
+
+func (pi *PreliminaryInvestigationHandler) CreateKeyword(c *gin.Context) {
+	principal := c.MustGet("principal").(*model.Principal)
+
+	reviewId, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		c.AbortWithStatus(400)
+		return
+	}
+
+	investigationId, err := uuid.Parse(c.Param("investigationId"))
+	if err != nil {
+		c.AbortWithStatus(400)
+		return
+	}
+
+	review, err := pi.ReviewService.GetById(reviewId, principal.Id)
+	if err != nil {
+		c.AbortWithStatus(404)
+		return
+	}
+
+	investigation, err := pi.PreliminaryInvestigationService.GetById(investigationId, principal.Id)
+	if err != nil {
+		c.AbortWithStatus(404)
+		return
+	}
+
+	keywords, err := pi.PreliminaryInvestigationService.GetKeywordsByInvestigationId(investigationId)
+	if err != nil {
+		return
+	}
+
+	pageData := common.PageData{
+		Title:  "Preliminary Investigation",
+		Active: "reviews",
+		User:   principal,
+	}
+
+	keywordForm := new(form.KeywordForm)
+	if err := c.ShouldBind(&keywordForm); err != nil {
+		slog.Warn("investigation keyword create", "error", err.Error())
+		pageData.Message = "Invalid form data"
+		c.HTML(200, "preliminary_investigations/show.html", gin.H{
+			"pageData":      pageData,
+			"keywordForm":   keywordForm,
+			"review":        review,
+			"investigation": investigation,
+			"keywords":      keywords,
+		})
+		return
+	}
+	slog.Info("investigation keyword create", "data", keywordForm)
+
+	if err := common.Validate(keywordForm); len(err) > 0 {
+		slog.Warn("investigation keyword create", "error", "validation error")
+		pageData.Errors = err
+		c.HTML(400, "preliminary_investigations/show.html", gin.H{
+			"pageData":      pageData,
+			"keywordForm":   keywordForm,
+			"review":        review,
+			"investigation": investigation,
+			"keywords":      keywords,
+		})
+		return
+	}
+
+	err = pi.PreliminaryInvestigationService.SaveKeyword(investigationId, principal.Id, *keywordForm)
+	if err != nil {
+		pageData.Message = err.Error()
+		c.HTML(409, "preliminary_investigations/show.html", gin.H{
+			"pageData":      pageData,
+			"keywordForm":   keywordForm,
+			"review":        review,
+			"investigation": investigation,
+			"keywords":      keywords,
+		})
+		return
+	}
+
+	c.Redirect(302, "/reviews/"+reviewId.String())
+
 }
 
 func RegisterPreliminaryInvestigationHandler(
@@ -154,4 +243,9 @@ func RegisterPreliminaryInvestigationHandler(
 	r.GET("/reviews/:id/preliminary_investigations/create", middleware, preliminaryInvestigationHandler.CreateForm)
 	r.POST("/reviews/:id/preliminary_investigations/create", middleware, preliminaryInvestigationHandler.Create)
 	r.GET("/reviews/:id/preliminary_investigations/:investigationId", middleware, preliminaryInvestigationHandler.Show)
+	r.POST(
+		"/reviews/:id/preliminary_investigations/:investigationId/keywords",
+		middleware,
+		preliminaryInvestigationHandler.CreateKeyword,
+	)
 }

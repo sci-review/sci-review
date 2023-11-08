@@ -1,0 +1,33 @@
+{{ define "keywords/new.html" }}
+<div>
+    {{ if .pageData.Message }}
+    <div class="alert alert-danger" role="alert">
+        {{ .pageData.Message }}
+    </div>
+    {{ end }}
+    {{ if .pageData.Errors }}
+    <div class="alert alert-danger" role="alert">
+        <ul>
+            {{ range $key, $value := .pageData.Errors }}
+            <li>{{ $value.Error }}</li>
+            {{ end }}
+        </ul>
+    </div>
+    {{ end }}
+    <form action="/reviews/{{ .review.Id }}/preliminary_investigations/{{ .investigation.Id }}/keywords" method="post">
+        <input type="hidden" name="CSRF" value="" />
+        <div class="mb-3">
+            <label for="word" class="form-label">Keyword</label>
+            <input type="text" class="form-control" id="word" name="word" value="" />
+        </div>
+        <div class="mb-3">
+            <label for="synonyms" class="form-label">Synonyms</label>
+            <p class="form-text mt-0 mb-2">One synonym per line </p>
+            <textarea rows="7" class="form-control" id="synonyms" name="synonyms"></textarea>
+        </div>
+        <div class="mb-3">
+            <button type="submit" class="btn btn-dark">Save</button>
+        </div>
+    </form>
+</div>
+{{ end }}

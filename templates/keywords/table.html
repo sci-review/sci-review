@@ -1,0 +1,73 @@
+{{ define "keywords/table.html" }}
+<a class="btn btn-dark btn-sm" data-bs-toggle="modal" data-bs-target="#new-keyword">New Keyword</a>
+<div class="table-responsive-md mt-4">
+    <table class="table table-sm">
+        <thead class="">
+        <tr>
+            <th scope="col">Keyword</th>
+            <th scope="col">Synonyms</th>
+            <th scope="col"></th>
+        </tr>
+        </thead>
+        <tbody>
+        {{ range .keywords }}
+        <tr>
+            <td>{{ .Word }}</td>
+            <td>
+                {{ range .Synonyms }}
+                <p> {{ . }} </p>
+                {{ end }}
+            </td>
+            <td>
+                <a href="#" class="btn btn-sm btn-outline-dark">Edit</a>
+                <a href="#" class="btn btn-sm btn-outline-danger">Delete</a>
+            </td>
+        </tr>
+        {{ end }}
+<!--        <tr>-->
+<!--            <td>medical imaging</td>-->
+<!--            <td>-->
+<!--                <p>medical image</p>-->
+<!--                <p>diagnostic imaging</p>-->
+<!--                <p>diagnostic image</p>-->
+<!--                <p>clinical imaging</p>-->
+<!--                <p>clinical image</p>-->
+<!--                <p>histopathology imaging</p>-->
+<!--                <p>histopathology image</p>-->
+<!--                <p>histological imaging</p>-->
+<!--                <p>histological image</p>-->
+<!--            </td>-->
+<!--            <td>-->
+<!--                <a href="#" class="btn btn-sm btn-outline-dark">Edit</a>-->
+<!--                <a href="#" class="btn btn-sm btn-outline-danger">Delete</a>-->
+<!--            </td>-->
+<!--        </tr>-->
+        </tbody>
+    </table>
+</div>
+
+<div class="modal fade" id="new-keyword" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Keyword</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                {{ template "keywords/new.html" . }}
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{{ if or .pageData.Message .pageData.Errors }}
+<script>
+    window.onload = function myFunc() {
+        var myModal = new window.bootstrap.Modal(document.getElementById('new-keyword'))
+        myModal.show()
+    }
+</script>
+{{ end }}
+
+{{ end }}
