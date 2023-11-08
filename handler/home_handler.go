@@ -1,9 +1,6 @@
 package handler
 
-import (
-	"fmt"
-	"github.com/gin-gonic/gin"
-)
+import "github.com/gin-gonic/gin"
 
 type HomeHandler struct {
 }
@@ -16,11 +13,10 @@ func (hh *HomeHandler) Index(c *gin.Context) {
 	_, exists := c.Get("principal")
 
 	if exists {
-		c.Redirect(302, "/organizations")
+		c.Redirect(302, "/reviews")
 		return
 	}
 
-	fmt.Println("home handler")
 	c.Redirect(302, "/login")
 }
 

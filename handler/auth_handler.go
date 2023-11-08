@@ -76,7 +76,7 @@ func (ah *AuthHandler) Login(c *gin.Context) {
 	session.Set("userRole", string(userLogged.Role))
 	session.Save()
 
-	c.Redirect(302, "organizations")
+	c.Redirect(302, "reviews")
 }
 
 func (ah *AuthHandler) LoginForm(c *gin.Context) {
