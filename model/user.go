@@ -32,6 +32,10 @@ func NewUser(name string, email string, password string) *User {
 	}
 }
 
+func (u User) IsAdmin() bool {
+	return u.Role == UserAdmin
+}
+
 func (u User) LogValue() slog.Value {
 	return slog.GroupValue(
 		slog.String("id", u.Id.String()),

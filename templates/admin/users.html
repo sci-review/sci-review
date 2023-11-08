@@ -1,0 +1,56 @@
+{{ define "admin/users.html" }}
+{{ template "globals/header.html" . }}
+{{ template "globals/main-nav.html" . }}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div style="display: flex; justify-content: space-between; align-items: center">
+                <h2>{{ .pageData.Title }}</h2>
+            </div>
+            <hr>
+            <div>
+                {{ if .pageData.Message }}
+                <div class="alert alert-danger" role="alert">
+                    {{ .pageData.Message }}
+                </div>
+                {{ end }}
+
+                {{ if not (eq (len .users) 0) }}
+                <div class="row">
+                    {{ range .users }}
+                    <div class="col-md-12 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ .Name }}</h5>
+                                <p class="card-text">{{ .Email }}</p>
+                                <p class="card-text">{{ .Role }}</p>
+                                <p class="card-text">{{ .Active }}</p>
+                                <p class="card-text">{{ .CreatedAt }}</p>
+                                <p class="card-text">{{ .UpdatedAt }}</p>
+<!--                                <form action="/users/{{ .Id }}/deactivate" method="post">-->
+<!--                                    <button type="submit" onclick="return confirm(`Are you sure you want to deactivate this user?`);" class="btn btn-dark btn-sm">Deactivate</button>-->
+<!--                                </form>-->
+                                <form method="post">
+                                {{ if eq .Active true }}
+                                    <button type="submit" formaction="/users/{{ .Id }}/deactivate" onclick="return confirm(`Are you sure you want to deactivate this user?`);" class="btn btn-dark btn-sm">Deactivate</button>
+                                {{ else }}
+                                    <button type="submit" formaction="/users/{{ .Id }}/activate" onclick="return confirm(`Are you sure you want to activate this user?`);" class="btn btn-dark btn-sm">Activate</button>
+                                {{ end }}
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {{ end }}
+                </div>
+                {{ else }}
+                <div class="alert alert-info" role="alert">
+                    No users found.
+                </div>
+                {{ end }}
+
+            </div>
+        </div>
+    </div>
+</div>
+{{ template "globals/footer.html" . }}
+{{ end }}

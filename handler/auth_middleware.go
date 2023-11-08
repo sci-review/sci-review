@@ -23,3 +23,18 @@ func AuthMiddleware() gin.HandlerFunc {
 		c.Next()
 	}
 }
+
+func AdminMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		session := sessions.Default(c)
+		userRole := session.Get("userRole")
+
+		if userRole != model.UserAdmin {
+			c.Redirect(302, "/login")
+			c.Abort()
+			return
+		}
+
+		c.Next()
+	}
+}
