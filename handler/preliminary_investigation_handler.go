@@ -113,18 +113,23 @@ func (pi *PreliminaryInvestigationHandler) Show(c *gin.Context) {
 		return
 	}
 
+	investigationId, err := uuid.Parse(c.Param("investigationId"))
+	if err != nil {
+		c.AbortWithStatus(400)
+		return
+	}
+
 	review, err := pi.ReviewService.GetById(reviewId, principal.Id)
 	if err != nil {
 		c.AbortWithStatus(404)
 		return
 	}
 
-	// TODO: get preliminary investigation by review id
-	// preliminaryInvestigation, err := pi.PreliminaryInvestigationService.GetById(reviewId, principal.Id)
-	// if err != nil {
-	// 	c.AbortWithStatus(404)
-	// 	return
-	// }
+	investigation, err := pi.PreliminaryInvestigationService.GetById(investigationId, principal.Id)
+	if err != nil {
+		c.AbortWithStatus(404)
+		return
+	}
 
 	pageData := common.PageData{
 		Title:  "Preliminary Investigation",
@@ -133,8 +138,9 @@ func (pi *PreliminaryInvestigationHandler) Show(c *gin.Context) {
 	}
 
 	c.HTML(200, "preliminary_investigations/show.html", gin.H{
-		"pageData": pageData,
-		"review":   review,
+		"pageData":      pageData,
+		"review":        review,
+		"investigation": investigation,
 	})
 }
 
@@ -147,5 +153,5 @@ func RegisterPreliminaryInvestigationHandler(
 	preliminaryInvestigationHandler := NewPreliminaryInvestigationHandler(reviewService, preliminaryInvestigationService)
 	r.GET("/reviews/:id/preliminary_investigations/create", middleware, preliminaryInvestigationHandler.CreateForm)
 	r.POST("/reviews/:id/preliminary_investigations/create", middleware, preliminaryInvestigationHandler.Create)
-	r.GET("/reviews/:id/preliminary_investigations/:piId", middleware, preliminaryInvestigationHandler.Show)
+	r.GET("/reviews/:id/preliminary_investigations/:investigationId", middleware, preliminaryInvestigationHandler.Show)
 }

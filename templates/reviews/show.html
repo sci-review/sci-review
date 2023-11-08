@@ -61,15 +61,15 @@
                     <p class="card-title fw-medium">Question</p>
                     <p class="card-text">{{ .Question }}</p>
                     {{ if eq .Status "InProgress" }}
-                    <span class="badge bg-primary">In Progress</span>
+                    <span class="badge rounded-pill bg-primary">In Progress</span>
                     {{ else if eq .Status "Proceed" }}
-                    <span class="badge bg-success">Proceed with Review</span>
+                    <span class="badge rounded-pill bg-success">Proceed with Review</span>
                     {{ else if eq .Status "DoNotProceed" }}
-                    <span class="badge bg-warning">Do not Proceed with Review</span>
+                    <span class="badge rounded-pill bg-danger">Do not Proceed with Review</span>
                     {{ else if eq .Status "Cancelled" }}
-                    <span class="badge bg-secondary">Cancelled</span>
+                    <span class="badge rounded-pill bg-secondary">Cancelled</span>
                     {{ else }}
-                    <span class="badge bg-info">{{ .Status }}</span>
+                    <span class="badge rounded-pill bg-info">{{ .Status }}</span>
                     {{ end }}
                     <a href="/reviews/{{ .ReviewId }}/preliminary_investigations/{{ .Id }}" class="stretched-link"></a>
                 </div>
