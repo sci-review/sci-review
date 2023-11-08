@@ -8,34 +8,4 @@
     <title>{{ .pageData.Title }}</title>
 </head>
 <body>
-<nav class="navbar navbar-expand-sm navbar-dark bg-dark mb-4">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="/">SciReview</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNavDropdown">
-            <ul class="navbar-nav ms-auto">
-                {{ if .pageData.User }}
-                <li class="nav-item">
-                    <a class="nav-link {{if eq .pageData.Active "reviews"}}active{{end}}" href="/reviews">Reviews</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {{if eq .pageData.Active "organizations"}}active{{end}}" href="/organizations">Organizations</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/logout">Logout</a>
-                </li>
-                {{ else }}
-                <li class="nav-item">
-                    <a class="nav-link {{if eq .pageData.Active "register"}}active{{end}}" href="/register">Register</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {{if eq .pageData.Active "login"}}active{{end}}" href="/login">Login</a>
-                </li>
-                {{ end }}
-            </ul>
-        </div>
-    </div>
-</nav>
 {{ end }}
