@@ -16,8 +16,8 @@ func NewPreliminaryInvestigationRepo(DB *sqlx.DB) *PreliminaryInvestigationRepo 
 
 func (pr *PreliminaryInvestigationRepo) Create(model *model.PreliminaryInvestigation) error {
 	query := `
-		INSERT INTO preliminary_investigations (id, user_id, review_id, question, created_at, updated_at)
-		VALUES (:id, :user_id, :review_id, :question, :created_at, :updated_at)
+		INSERT INTO preliminary_investigations (id, user_id, review_id, question, status, created_at, updated_at)
+		VALUES (:id, :user_id, :review_id, :question, :status, :created_at, :updated_at)
 	`
 	_, err := pr.DB.NamedExec(query, model)
 	if err != nil {

@@ -3,6 +3,7 @@ CREATE TABLE preliminary_investigations(
     user_id UUID NOT NULL,
     review_id UUID NOT NULL,
     question TEXT NOT NULL,
+    status VARCHAR NOT NULL,
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL,
     CONSTRAINT preliminary_investigations_pk PRIMARY KEY (id),

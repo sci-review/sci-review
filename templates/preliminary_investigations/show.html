@@ -1,0 +1,53 @@
+{{ define "preliminary_investigations/show.html" }}
+{{ template "globals/header.html" . }}
+
+<div class="container-fluid">
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div>
+                <h3>Preliminary Investigation</h3>
+                <p><b>Question:</b> {{ .investigation.Question}}</p>
+                {{ if eq .investigation.Status "InProgress" }}
+                <span class="badge bg-primary">In Progress</span>
+                {{ else if eq .investigation.Status "Proceed" }}
+                <span class="badge bg-success">Proceed with Review</span>
+                {{ else if eq .investigation.Status "DoNotProceed" }}
+                <span class="badge bg-warning">Do not Proceed with Review</span>
+                {{ else if eq .investigation.Status "Cancelled" }}
+                <span class="badge bg-secondary">Cancelled</span>
+                {{ else }}
+                <span class="badge bg-info">{{ .Status }}</span>
+                {{ end }}
+            </div>
+            <hr>
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <ul class="nav nav-underline">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="#">Keywords</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Pilot Search</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Registered Protocols</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Published Reviews</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Conclusion</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <h5>Keywords</h5>
+        </div>
+    </div>
+</div>
+{{ template "globals/footer.html" . }}
+{{ end }}

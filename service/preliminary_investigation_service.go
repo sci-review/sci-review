@@ -16,7 +16,7 @@ func NewPreliminaryInvestigationService(preliminaryInvestigationRepo *repo.Preli
 }
 
 func (ps *PreliminaryInvestigationService) Create(data form.PreliminaryInvestigationForm, reviewId uuid.UUID, userId uuid.UUID) (*model.PreliminaryInvestigation, error) {
-	preliminaryInvestigation := model.NewPreliminaryInvestigation(userId, reviewId, data.Question)
+	preliminaryInvestigation := model.NewPreliminaryInvestigation(userId, reviewId, data.Question, model.PiStatusInProgress)
 
 	err := ps.PreliminaryInvestigationRepo.Create(preliminaryInvestigation)
 	if err != nil {

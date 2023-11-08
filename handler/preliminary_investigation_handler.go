@@ -104,6 +104,40 @@ func (pi *PreliminaryInvestigationHandler) Create(c *gin.Context) {
 	c.Redirect(302, "/reviews/"+reviewId.String())
 }
 
+func (pi *PreliminaryInvestigationHandler) Show(c *gin.Context) {
+	principal := c.MustGet("principal").(*model.Principal)
+
+	reviewId, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		c.AbortWithStatus(400)
+		return
+	}
+
+	review, err := pi.ReviewService.GetById(reviewId, principal.Id)
+	if err != nil {
+		c.AbortWithStatus(404)
+		return
+	}
+
+	// TODO: get preliminary investigation by review id
+	// preliminaryInvestigation, err := pi.PreliminaryInvestigationService.GetById(reviewId, principal.Id)
+	// if err != nil {
+	// 	c.AbortWithStatus(404)
+	// 	return
+	// }
+
+	pageData := common.PageData{
+		Title:  "Preliminary Investigation",
+		Active: "reviews",
+		User:   principal,
+	}
+
+	c.HTML(200, "preliminary_investigations/show.html", gin.H{
+		"pageData": pageData,
+		"review":   review,
+	})
+}
+
 func RegisterPreliminaryInvestigationHandler(
 	r *gin.Engine,
 	reviewService *service.ReviewService,
@@ -113,4 +147,5 @@ func RegisterPreliminaryInvestigationHandler(
 	preliminaryInvestigationHandler := NewPreliminaryInvestigationHandler(reviewService, preliminaryInvestigationService)
 	r.GET("/reviews/:id/preliminary_investigations/create", middleware, preliminaryInvestigationHandler.CreateForm)
 	r.POST("/reviews/:id/preliminary_investigations/create", middleware, preliminaryInvestigationHandler.Create)
+	r.GET("/reviews/:id/preliminary_investigations/:piId", middleware, preliminaryInvestigationHandler.Show)
 }
