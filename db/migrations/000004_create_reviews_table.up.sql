@@ -1,6 +1,7 @@
 
 CREATE TABLE reviews(
     id UUID,
+    owner_id UUID NOT NULL,
     title VARCHAR NOT NULL,
     type VARCHAR NOT NULL,
     start_date DATE NOT NULL,
@@ -8,7 +9,8 @@ CREATE TABLE reviews(
     archived BOOLEAN NOT NULL,
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL,
-    CONSTRAINT reviews_pk PRIMARY KEY (id)
+    CONSTRAINT reviews_pk PRIMARY KEY (id),
+    CONSTRAINT reviews_fk1 FOREIGN KEY (owner_id) REFERENCES users(id)
 );
 
 CREATE TABLE reviewers(

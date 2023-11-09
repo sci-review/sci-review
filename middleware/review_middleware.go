@@ -18,7 +18,7 @@ func ReviewMiddleware(reviewService *service.ReviewService) gin.HandlerFunc {
 			return
 		}
 
-		review, err := reviewService.GetById(id, principal.Id)
+		review, err := reviewService.FindById(id, principal.Id)
 		if err != nil {
 			c.Redirect(302, "/reviews")
 			c.Abort()

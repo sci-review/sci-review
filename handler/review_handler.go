@@ -81,7 +81,7 @@ func (rh *ReviewHandler) Index(c *gin.Context) {
 		User:   principal,
 	}
 
-	reviews, err := rh.ReviewService.GetByUserId(principal.Id)
+	reviews, err := rh.ReviewService.FindAll(principal.Id)
 	if err != nil {
 		return
 	}

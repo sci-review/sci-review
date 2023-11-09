@@ -7,6 +7,7 @@ import (
 
 type Review struct {
 	Id         uuid.UUID  `db:"id" json:"id"`
+	OwnerId    uuid.UUID  `db:"owner_id" json:"ownerId"`
 	Title      string     `db:"title" json:"title"`
 	ReviewType ReviewType `db:"type" json:"type"`
 	StartDate  time.Time  `db:"start_date" json:"startDate"`
@@ -17,9 +18,10 @@ type Review struct {
 	Reviewers  []Reviewer `db:"-" json:"reviewers"`
 }
 
-func NewReview(title string, reviewType ReviewType, startDate time.Time, endDate time.Time) *Review {
+func NewReview(OwnerId uuid.UUID, title string, reviewType ReviewType, startDate time.Time, endDate time.Time) *Review {
 	return &Review{
 		Id:         uuid.New(),
+		OwnerId:    OwnerId,
 		Title:      title,
 		ReviewType: reviewType,
 		StartDate:  startDate,

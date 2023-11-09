@@ -46,7 +46,7 @@ func (s *ReviewService) Create(data form.ReviewCreateForm, userId uuid.UUID) (*m
 	tx := s.ReviewRepo.DB.MustBegin()
 	defer tx.Rollback()
 
-	review := model.NewReview(data.Title, data.ReviewType, startDate, endDate)
+	review := model.NewReview(userId, data.Title, data.ReviewType, startDate, endDate)
 	err = s.ReviewRepo.Create(review, tx)
 	if err != nil {
 		slog.Error(err.Error())
@@ -69,12 +69,12 @@ func (s *ReviewService) Create(data form.ReviewCreateForm, userId uuid.UUID) (*m
 	return review, nil
 }
 
-func (s *ReviewService) GetByUserId(userId uuid.UUID) (*[]model.Review, error) {
-	return s.ReviewRepo.GetByUserId(userId)
+func (s *ReviewService) FindAll(userId uuid.UUID) (*[]model.Review, error) {
+	return s.ReviewRepo.FindAllByUserId(userId)
 }
 
-func (s *ReviewService) GetById(id uuid.UUID, userId uuid.UUID) (*model.Review, error) {
-	review, err := s.ReviewRepo.GetByIdAndUserId(id, userId)
+func (s *ReviewService) FindById(id uuid.UUID, userId uuid.UUID) (*model.Review, error) {
+	review, err := s.ReviewRepo.FindById(id)
 	if err != nil {
 		return nil, ErrorReviewNotFound
 	}

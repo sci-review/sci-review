@@ -7,17 +7,18 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
+	"github.com/patrickmn/go-cache"
 	"golang.org/x/exp/slog"
 	"os"
 	"sci-review/handler"
 	"sci-review/middleware"
 	"sci-review/repo"
 	"sci-review/service"
+	"strconv"
+	"time"
 )
 
 func main() {
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
-	slog.SetDefault(logger)
 	slog.Info("starting application")
 
 	err := godotenv.Load()
@@ -28,10 +29,19 @@ func main() {
 	slog.Info("environment variables loaded")
 
 	appEnv := os.Getenv("APP_ENV")
+	logLevel := slog.LevelDebug
 	if appEnv == "production" {
 		gin.SetMode(gin.ReleaseMode)
+		logLevel = slog.LevelInfo
 	}
 	slog.Info("set application environment", "appEnv", appEnv)
+
+	opts := &slog.HandlerOptions{
+		Level: logLevel,
+	}
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, opts))
+	slog.SetDefault(logger)
+	slog.Info("logger initialized")
 
 	dataSourceName := os.Getenv("DATABASE_URL")
 	db, err := sqlx.Connect("pgx", dataSourceName)
@@ -41,13 +51,14 @@ func main() {
 	}
 	slog.Info("database connected established")
 
+	appCache := cacheInit()
 	userRepo := repo.NewUserRepo(db)
 	userService := service.NewUserService(userRepo)
 	loginAttemptRepo := repo.NewLoginAttemptRepo(db)
 	authService := service.NewAuthService(userRepo, loginAttemptRepo)
 	organizationRepo := repo.NewOrganizationRepo(db)
 	organizationService := service.NewOrganizationService(organizationRepo)
-	reviewRepo := repo.NewReviewRepo(db)
+	reviewRepo := repo.NewReviewRepo(db, appCache)
 	reviewService := service.NewReviewService(reviewRepo)
 	investigationRepo := repo.NewInvestigationRepo(db)
 	investigationService := service.NewInvestigationService(investigationRepo)
@@ -77,4 +88,27 @@ func main() {
 	slog.Info("routes registered")
 
 	r.Run(os.Getenv("PORT"))
+}
+
+func cacheInit() *cache.Cache {
+	slog.Info("Initializing cache")
+	defaultExpirationMinutesStr := os.Getenv("CACHE_DEFAULT_EXPIRATION_MINUTES")
+	cleanupIntervalMinutesStr := os.Getenv("CACHE_CLEANUP_INTERVAL_MINUTES")
+
+	defaultExpirationMinutes, err := strconv.Atoi(defaultExpirationMinutesStr)
+	if err != nil {
+		slog.Error("Error converting cache default expiration to int", "error", err.Error())
+		return nil
+	}
+
+	cleanupIntervalMinutes, err := strconv.Atoi(cleanupIntervalMinutesStr)
+	if err != nil {
+		slog.Error("Error converting cache cleanup interval to int", "error", err.Error())
+		return nil
+	}
+	defaultExpiration := time.Duration(defaultExpirationMinutes) * time.Minute
+	cleanupInterval := time.Duration(cleanupIntervalMinutes) * time.Minute
+
+	slog.Info("Cache initialized", "defaultExpiration in minutes", defaultExpirationMinutes, "cleanupInterval in minutes", cleanupIntervalMinutes)
+	return cache.New(defaultExpiration, cleanupInterval)
 }
