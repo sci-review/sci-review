@@ -1,10 +1,10 @@
 package model
 
-type PiStatus string
+type InvestigationStatus string
 
 const (
-	PiStatusInProgress   PiStatus = "InProgress"
-	PiStatusProceed               = "Proceed"
-	PiStatusDoNotProceed          = "DoNotProceed"
-	PiStatusCancelled             = "Cancelled"
+	PiStatusInProgress   InvestigationStatus = "InProgress"
+	PiStatusProceed                          = "Proceed"
+	PiStatusDoNotProceed                     = "DoNotProceed"
+	PiStatusCancelled                        = "Cancelled"
 )

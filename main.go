@@ -49,14 +49,14 @@ func main() {
 	organizationService := service.NewOrganizationService(organizationRepo)
 	reviewRepo := repo.NewReviewRepo(db)
 	reviewService := service.NewReviewService(reviewRepo)
-	preliminaryInvestigationRepo := repo.NewPreliminaryInvestigationRepo(db)
-	preliminaryInvestigationService := service.NewPreliminaryInvestigationService(preliminaryInvestigationRepo)
+	investigationRepo := repo.NewInvestigationRepo(db)
+	investigationService := service.NewInvestigationService(investigationRepo)
 	slog.Info("services initialized")
 
 	authMiddleware := handler.AuthMiddleware()
 	adminMiddleware := handler.AdminMiddleware()
 	reviewMiddleware := middleware.ReviewMiddleware(reviewService)
-	investigationMiddleware := middleware.InvestigationMiddleware(preliminaryInvestigationService)
+	investigationMiddleware := middleware.InvestigationMiddleware(investigationService)
 	slog.Info("middleware initialized")
 
 	r := gin.Default()
@@ -71,8 +71,8 @@ func main() {
 	handler.RegisterUserHandler(r, userService)
 	handler.RegisterAdminHandler(r, userService, authMiddleware, adminMiddleware)
 	handler.RegisterOrganizationHandler(r, organizationService, authMiddleware)
-	handler.RegisterReviewHandler(r, reviewService, preliminaryInvestigationService, authMiddleware, reviewMiddleware, investigationMiddleware)
-	handler.RegisterPreliminaryInvestigationHandler(r, reviewService, preliminaryInvestigationService, authMiddleware, reviewMiddleware, investigationMiddleware)
+	handler.RegisterReviewHandler(r, reviewService, investigationService, authMiddleware, reviewMiddleware, investigationMiddleware)
+	handler.RegisterInvestigationHandler(r, reviewService, investigationService, authMiddleware, reviewMiddleware, investigationMiddleware)
 
 	slog.Info("routes registered")
 

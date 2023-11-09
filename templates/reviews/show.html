@@ -44,7 +44,7 @@
     </div>
     <div class="row">
         <div class="col-md-12 mb-3">
-            <a href="/reviews/{{ .review.Id }}/preliminary_investigations/create"
+            <a href="/reviews/{{ .review.Id }}/investigations/create"
                class="btn btn-dark btn-sm">New Investigation Question</a>
 
             <a style="color: black" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button" aria-controls="offcanvasExample">
@@ -71,20 +71,15 @@
                     {{ else }}
                     <span class="badge rounded-pill bg-info">{{ .Status }}</span>
                     {{ end }}
-                    <a href="/reviews/{{ .ReviewId }}/preliminary_investigations/{{ .Id }}" class="stretched-link"></a>
+                    <a href="/reviews/{{ .ReviewId }}/investigations/{{ .Id }}" class="stretched-link"></a>
                 </div>
             </div>
             {{ end }}
         </div>
         {{ else }}
         <div class="col-md-12">
-            <div class="alert alert-warning" role="alert">
+            <div class="alert alert-info" role="alert">
                 Before you start defining the protocol, you can create an initial investigation.
-                <a style="color: black" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button" aria-controls="offcanvasExample">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-question-circle-fill" viewBox="0 0 16 16">
-                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.496 6.033h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286a.237.237 0 0 0 .241.247zm2.325 6.443c.61 0 1.029-.394 1.029-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94 0 .533.425.927 1.01.927z"/>
-                    </svg>
-                </a>
             </div>
         </div>
         {{ end }}
@@ -92,7 +87,7 @@
 </div>
 
 
-<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
+<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
     <div class="offcanvas-header">
         <h5 class="offcanvas-title" id="offcanvasExampleLabel">Preliminary Investigation</h5>
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>

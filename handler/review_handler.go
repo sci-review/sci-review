@@ -10,12 +10,12 @@ import (
 )
 
 type ReviewHandler struct {
-	ReviewService                   *service.ReviewService
-	PreliminaryInvestigationService *service.PreliminaryInvestigationService
+	ReviewService        *service.ReviewService
+	InvestigationService *service.InvestigationService
 }
 
-func NewReviewHandler(reviewService *service.ReviewService, preliminaryInvestigationService *service.PreliminaryInvestigationService) *ReviewHandler {
-	return &ReviewHandler{ReviewService: reviewService, PreliminaryInvestigationService: preliminaryInvestigationService}
+func NewReviewHandler(reviewService *service.ReviewService, investigationService *service.InvestigationService) *ReviewHandler {
+	return &ReviewHandler{ReviewService: reviewService, InvestigationService: investigationService}
 }
 
 func (rh *ReviewHandler) CreateForm(c *gin.Context) {
@@ -96,7 +96,7 @@ func (rh *ReviewHandler) Show(c *gin.Context) {
 	principal := c.MustGet("principal").(*model.Principal)
 	review := c.MustGet("review").(*model.Review)
 
-	investigations, err := rh.PreliminaryInvestigationService.GetAllByReviewID(review.Id)
+	investigations, err := rh.InvestigationService.GetAllByReviewID(review.Id)
 	if err != nil {
 		return
 	}
@@ -117,12 +117,12 @@ func (rh *ReviewHandler) Show(c *gin.Context) {
 func RegisterReviewHandler(
 	r *gin.Engine,
 	reviewService *service.ReviewService,
-	preliminaryInvestigationService *service.PreliminaryInvestigationService,
+	investigationService *service.InvestigationService,
 	authMiddleware gin.HandlerFunc,
 	reviewMiddleware gin.HandlerFunc,
 	investigationMiddleware gin.HandlerFunc,
 ) {
-	reviewHandler := NewReviewHandler(reviewService, preliminaryInvestigationService)
+	reviewHandler := NewReviewHandler(reviewService, investigationService)
 	r.GET("/reviews", authMiddleware, reviewHandler.Index)
 	r.GET("/reviews/new", authMiddleware, reviewHandler.CreateForm)
 	r.POST("/reviews/new", authMiddleware, reviewHandler.Create)

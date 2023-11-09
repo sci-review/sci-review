@@ -14,7 +14,7 @@
         </ul>
     </div>
     {{ end }}
-    <form action="/reviews/{{ .review.Id }}/preliminary_investigations/{{ .investigation.Id }}/keywords" method="post">
+    <form action="/reviews/{{ .review.Id }}/investigations/{{ .investigation.Id }}/keywords" method="post">
         <input type="hidden" name="CSRF" value="" />
         <div class="mb-3">
             <label for="word" class="form-label">Keyword</label>

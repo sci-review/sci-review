@@ -7,7 +7,7 @@ import (
 	"sci-review/service"
 )
 
-func InvestigationMiddleware(investigationService *service.PreliminaryInvestigationService) gin.HandlerFunc {
+func InvestigationMiddleware(investigationService *service.InvestigationService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		principal := c.MustGet("principal").(*model.Principal)
 

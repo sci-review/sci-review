@@ -8,5 +8,5 @@ CREATE TABLE investigation_keywords(
     updated_at TIMESTAMP NOT NULL,
     CONSTRAINT investigation_keywords_pk PRIMARY KEY (id),
     CONSTRAINT investigation_keywords_fk1 FOREIGN KEY (user_id) REFERENCES users(id),
-    CONSTRAINT investigation_keywords_fk2 FOREIGN KEY (investigation_id) REFERENCES preliminary_investigations(id)
+    CONSTRAINT investigation_keywords_fk2 FOREIGN KEY (investigation_id) REFERENCES investigations(id)
 );
