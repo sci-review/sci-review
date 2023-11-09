@@ -2,7 +2,6 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"golang.org/x/exp/slog"
 	"sci-review/common"
 	"sci-review/form"
@@ -21,18 +20,7 @@ func NewPreliminaryInvestigationHandler(reviewService *service.ReviewService, pr
 
 func (pi *PreliminaryInvestigationHandler) CreateForm(c *gin.Context) {
 	principal := c.MustGet("principal").(*model.Principal)
-
-	reviewId, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		c.AbortWithStatus(400)
-		return
-	}
-
-	review, err := pi.ReviewService.GetById(reviewId, principal.Id)
-	if err != nil {
-		c.AbortWithStatus(404)
-		return
-	}
+	review := c.MustGet("review").(*model.Review)
 
 	pageData := common.PageData{
 		Title:  "Create Preliminary Investigation",
@@ -47,18 +35,7 @@ func (pi *PreliminaryInvestigationHandler) CreateForm(c *gin.Context) {
 
 func (pi *PreliminaryInvestigationHandler) Create(c *gin.Context) {
 	principal := c.MustGet("principal").(*model.Principal)
-
-	reviewId, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		c.AbortWithStatus(400)
-		return
-	}
-
-	review, err := pi.ReviewService.GetById(reviewId, principal.Id)
-	if err != nil {
-		c.AbortWithStatus(404)
-		return
-	}
+	review := c.MustGet("review").(*model.Review)
 
 	pageData := common.PageData{
 		Title:  "Create Preliminary Investigation",
@@ -90,7 +67,7 @@ func (pi *PreliminaryInvestigationHandler) Create(c *gin.Context) {
 		return
 	}
 
-	_, err = pi.PreliminaryInvestigationService.Create(*preliminaryInvestigationForm, reviewId, principal.Id)
+	_, err := pi.PreliminaryInvestigationService.Create(*preliminaryInvestigationForm, review.Id, principal.Id)
 	if err != nil {
 		pageData.Message = err.Error()
 		c.HTML(409, "preliminary_investigations/create.html", gin.H{
@@ -101,37 +78,15 @@ func (pi *PreliminaryInvestigationHandler) Create(c *gin.Context) {
 		return
 	}
 
-	c.Redirect(302, "/reviews/"+reviewId.String())
+	c.Redirect(302, "/reviews/"+review.Id.String())
 }
 
 func (pi *PreliminaryInvestigationHandler) Show(c *gin.Context) {
 	principal := c.MustGet("principal").(*model.Principal)
+	review := c.MustGet("review").(*model.Review)
+	investigation := c.MustGet("investigation").(*model.PreliminaryInvestigation)
 
-	reviewId, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		c.AbortWithStatus(400)
-		return
-	}
-
-	investigationId, err := uuid.Parse(c.Param("investigationId"))
-	if err != nil {
-		c.AbortWithStatus(400)
-		return
-	}
-
-	review, err := pi.ReviewService.GetById(reviewId, principal.Id)
-	if err != nil {
-		c.AbortWithStatus(404)
-		return
-	}
-
-	investigation, err := pi.PreliminaryInvestigationService.GetById(investigationId, principal.Id)
-	if err != nil {
-		c.AbortWithStatus(404)
-		return
-	}
-
-	keywords, err := pi.PreliminaryInvestigationService.GetKeywordsByInvestigationId(investigationId)
+	keywords, err := pi.PreliminaryInvestigationService.GetKeywordsByInvestigationId(investigation.Id)
 	if err != nil {
 		return
 	}
@@ -152,32 +107,10 @@ func (pi *PreliminaryInvestigationHandler) Show(c *gin.Context) {
 
 func (pi *PreliminaryInvestigationHandler) CreateKeyword(c *gin.Context) {
 	principal := c.MustGet("principal").(*model.Principal)
+	review := c.MustGet("review").(*model.Review)
+	investigation := c.MustGet("investigation").(*model.PreliminaryInvestigation)
 
-	reviewId, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		c.AbortWithStatus(400)
-		return
-	}
-
-	investigationId, err := uuid.Parse(c.Param("investigationId"))
-	if err != nil {
-		c.AbortWithStatus(400)
-		return
-	}
-
-	review, err := pi.ReviewService.GetById(reviewId, principal.Id)
-	if err != nil {
-		c.AbortWithStatus(404)
-		return
-	}
-
-	investigation, err := pi.PreliminaryInvestigationService.GetById(investigationId, principal.Id)
-	if err != nil {
-		c.AbortWithStatus(404)
-		return
-	}
-
-	keywords, err := pi.PreliminaryInvestigationService.GetKeywordsByInvestigationId(investigationId)
+	keywords, err := pi.PreliminaryInvestigationService.GetKeywordsByInvestigationId(investigation.Id)
 	if err != nil {
 		return
 	}
@@ -216,7 +149,7 @@ func (pi *PreliminaryInvestigationHandler) CreateKeyword(c *gin.Context) {
 		return
 	}
 
-	err = pi.PreliminaryInvestigationService.SaveKeyword(investigationId, principal.Id, *keywordForm)
+	err = pi.PreliminaryInvestigationService.SaveKeyword(investigation.Id, principal.Id, *keywordForm)
 	if err != nil {
 		pageData.Message = err.Error()
 		c.HTML(409, "preliminary_investigations/show.html", gin.H{
@@ -229,7 +162,7 @@ func (pi *PreliminaryInvestigationHandler) CreateKeyword(c *gin.Context) {
 		return
 	}
 
-	c.Redirect(302, "/reviews/"+reviewId.String())
+	c.Redirect(302, "/reviews/"+review.Id.String()+"/preliminary_investigations/"+investigation.Id.String())
 
 }
 
@@ -237,15 +170,35 @@ func RegisterPreliminaryInvestigationHandler(
 	r *gin.Engine,
 	reviewService *service.ReviewService,
 	preliminaryInvestigationService *service.PreliminaryInvestigationService,
-	middleware gin.HandlerFunc,
+	authMiddleware gin.HandlerFunc,
+	reviewMiddleware gin.HandlerFunc,
+	investigationMiddleware gin.HandlerFunc,
 ) {
 	preliminaryInvestigationHandler := NewPreliminaryInvestigationHandler(reviewService, preliminaryInvestigationService)
-	r.GET("/reviews/:id/preliminary_investigations/create", middleware, preliminaryInvestigationHandler.CreateForm)
-	r.POST("/reviews/:id/preliminary_investigations/create", middleware, preliminaryInvestigationHandler.Create)
-	r.GET("/reviews/:id/preliminary_investigations/:investigationId", middleware, preliminaryInvestigationHandler.Show)
+	r.GET(
+		"/reviews/:reviewId/preliminary_investigations/create",
+		authMiddleware,
+		reviewMiddleware,
+		preliminaryInvestigationHandler.CreateForm,
+	)
 	r.POST(
-		"/reviews/:id/preliminary_investigations/:investigationId/keywords",
-		middleware,
+		"/reviews/:reviewId/preliminary_investigations/create",
+		authMiddleware,
+		reviewMiddleware,
+		preliminaryInvestigationHandler.Create,
+	)
+	r.GET(
+		"/reviews/:reviewId/preliminary_investigations/:investigationId",
+		authMiddleware,
+		reviewMiddleware,
+		investigationMiddleware,
+		preliminaryInvestigationHandler.Show,
+	)
+	r.POST(
+		"/reviews/:reviewId/preliminary_investigations/:investigationId/keywords",
+		authMiddleware,
+		reviewMiddleware,
+		investigationMiddleware,
 		preliminaryInvestigationHandler.CreateKeyword,
 	)
 }

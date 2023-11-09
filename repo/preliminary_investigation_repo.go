@@ -39,16 +39,16 @@ func (pr *PreliminaryInvestigationRepo) GetAllByReviewID(reviewID uuid.UUID) ([]
 	return models, nil
 }
 
-func (pr *PreliminaryInvestigationRepo) GetById(investigationId uuid.UUID) (model.PreliminaryInvestigation, error) {
+func (pr *PreliminaryInvestigationRepo) GetById(investigationId uuid.UUID) (*model.PreliminaryInvestigation, error) {
 	investigation := model.PreliminaryInvestigation{}
 	query := `
 		SELECT * FROM preliminary_investigations WHERE id = $1
 	`
 	err := pr.DB.Get(&investigation, query, investigationId)
 	if err != nil {
-		return investigation, err
+		return nil, err
 	}
-	return investigation, nil
+	return &investigation, nil
 }
 
 func (pr *PreliminaryInvestigationRepo) SaveKeyword(investigationKeyword *model.InvestigationKeyword) error {

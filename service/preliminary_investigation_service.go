@@ -31,7 +31,7 @@ func (ps *PreliminaryInvestigationService) GetAllByReviewID(reviewId uuid.UUID) 
 	return ps.PreliminaryInvestigationRepo.GetAllByReviewID(reviewId)
 }
 
-func (ps *PreliminaryInvestigationService) GetById(investigationId uuid.UUID, userId uuid.UUID) (model.PreliminaryInvestigation, error) {
+func (ps *PreliminaryInvestigationService) GetById(investigationId uuid.UUID, userId uuid.UUID) (*model.PreliminaryInvestigation, error) {
 	return ps.PreliminaryInvestigationRepo.GetById(investigationId)
 }
 

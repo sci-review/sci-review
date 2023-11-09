@@ -2,7 +2,6 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"golang.org/x/exp/slog"
 	"sci-review/common"
 	"sci-review/form"
@@ -95,18 +94,7 @@ func (rh *ReviewHandler) Index(c *gin.Context) {
 
 func (rh *ReviewHandler) Show(c *gin.Context) {
 	principal := c.MustGet("principal").(*model.Principal)
-
-	id, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		c.Redirect(302, "/reviews")
-		return
-	}
-
-	review, err := rh.ReviewService.GetById(id, principal.Id)
-	if err != nil {
-		c.Redirect(302, "/reviews")
-		return
-	}
+	review := c.MustGet("review").(*model.Review)
 
 	investigations, err := rh.PreliminaryInvestigationService.GetAllByReviewID(review.Id)
 	if err != nil {
@@ -130,11 +118,13 @@ func RegisterReviewHandler(
 	r *gin.Engine,
 	reviewService *service.ReviewService,
 	preliminaryInvestigationService *service.PreliminaryInvestigationService,
-	middleware gin.HandlerFunc,
+	authMiddleware gin.HandlerFunc,
+	reviewMiddleware gin.HandlerFunc,
+	investigationMiddleware gin.HandlerFunc,
 ) {
 	reviewHandler := NewReviewHandler(reviewService, preliminaryInvestigationService)
-	r.GET("/reviews", middleware, reviewHandler.Index)
-	r.GET("/reviews/new", middleware, reviewHandler.CreateForm)
-	r.POST("/reviews/new", middleware, reviewHandler.Create)
-	r.GET("/reviews/:id", middleware, reviewHandler.Show)
+	r.GET("/reviews", authMiddleware, reviewHandler.Index)
+	r.GET("/reviews/new", authMiddleware, reviewHandler.CreateForm)
+	r.POST("/reviews/new", authMiddleware, reviewHandler.Create)
+	r.GET("/reviews/:reviewId", authMiddleware, reviewMiddleware, reviewHandler.Show)
 }

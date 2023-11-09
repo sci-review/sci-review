@@ -10,6 +10,7 @@ import (
 	"golang.org/x/exp/slog"
 	"os"
 	"sci-review/handler"
+	"sci-review/middleware"
 	"sci-review/repo"
 	"sci-review/service"
 )
@@ -54,6 +55,8 @@ func main() {
 
 	authMiddleware := handler.AuthMiddleware()
 	adminMiddleware := handler.AdminMiddleware()
+	reviewMiddleware := middleware.ReviewMiddleware(reviewService)
+	investigationMiddleware := middleware.InvestigationMiddleware(preliminaryInvestigationService)
 	slog.Info("middleware initialized")
 
 	r := gin.Default()
@@ -68,8 +71,8 @@ func main() {
 	handler.RegisterUserHandler(r, userService)
 	handler.RegisterAdminHandler(r, userService, authMiddleware, adminMiddleware)
 	handler.RegisterOrganizationHandler(r, organizationService, authMiddleware)
-	handler.RegisterReviewHandler(r, reviewService, preliminaryInvestigationService, authMiddleware)
-	handler.RegisterPreliminaryInvestigationHandler(r, reviewService, preliminaryInvestigationService, authMiddleware)
+	handler.RegisterReviewHandler(r, reviewService, preliminaryInvestigationService, authMiddleware, reviewMiddleware, investigationMiddleware)
+	handler.RegisterPreliminaryInvestigationHandler(r, reviewService, preliminaryInvestigationService, authMiddleware, reviewMiddleware, investigationMiddleware)
 
 	slog.Info("routes registered")
 
