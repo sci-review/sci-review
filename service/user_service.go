@@ -45,15 +45,9 @@ func (us *UserService) Create(userCreateForm form.UserCreateForm) (*model.User, 
 }
 
 func (us *UserService) FindAll(loggedUserId uuid.UUID) (*[]model.User, error) {
-	loggedUser, err := us.UserRepo.GetById(loggedUserId)
+	_, err := us.checkIsAdmin(loggedUserId)
 	if err != nil {
-		slog.Warn("user findall", "error", "logged user not found", "loggedUserId", loggedUserId)
 		return nil, err
-	}
-
-	if !loggedUser.IsAdmin() {
-		slog.Warn("user findall", "error", "logged user is not admin", "loggedUserId", loggedUserId)
-		return nil, common.ForbiddenError
 	}
 
 	users, err := us.UserRepo.FindAll()
@@ -65,15 +59,9 @@ func (us *UserService) FindAll(loggedUserId uuid.UUID) (*[]model.User, error) {
 }
 
 func (us *UserService) Activate(loggedUserId uuid.UUID, userId uuid.UUID) error {
-	loggedUser, err := us.UserRepo.GetById(loggedUserId)
+	_, err := us.checkIsAdmin(loggedUserId)
 	if err != nil {
-		slog.Warn("user activate", "error", "logged user not found", "loggedUserId", loggedUserId)
 		return err
-	}
-
-	if !loggedUser.IsAdmin() {
-		slog.Warn("user activate", "error", "logged user is not admin", "loggedUserId", loggedUserId)
-		return common.ForbiddenError
 	}
 
 	user, err := us.UserRepo.GetById(userId)
@@ -99,15 +87,9 @@ func (us *UserService) Activate(loggedUserId uuid.UUID, userId uuid.UUID) error 
 }
 
 func (us *UserService) Deactivate(loggedUserId uuid.UUID, userId uuid.UUID) error {
-	loggedUser, err := us.UserRepo.GetById(loggedUserId)
+	_, err := us.checkIsAdmin(loggedUserId)
 	if err != nil {
-		slog.Warn("user deactivate", "error", "logged user not found", "loggedUserId", loggedUserId)
 		return err
-	}
-
-	if !loggedUser.IsAdmin() {
-		slog.Warn("user deactivate", "error", "logged user is not admin", "loggedUserId", loggedUserId)
-		return common.ForbiddenError
 	}
 
 	user, err := us.UserRepo.GetById(userId)
@@ -130,4 +112,24 @@ func (us *UserService) Deactivate(loggedUserId uuid.UUID, userId uuid.UUID) erro
 	}
 
 	return nil
+}
+
+func (us *UserService) checkIsAdmin(loggedUserId uuid.UUID) (*model.User, error) {
+	loggedUser, err := us.UserRepo.GetById(loggedUserId)
+	if err != nil {
+		slog.Warn("user check", "error", "logged user not found", "loggedUserId", loggedUserId)
+		return nil, err
+	}
+
+	if !loggedUser.Active {
+		slog.Warn("user check", "error", "logged user is not active", "loggedUserId", loggedUserId)
+		return nil, ErrorUserNotActive
+	}
+
+	if !loggedUser.IsAdmin() {
+		slog.Warn("user check", "error", "logged user is not admin", "loggedUserId", loggedUserId)
+		return nil, common.ForbiddenError
+	}
+
+	return loggedUser, nil
 }

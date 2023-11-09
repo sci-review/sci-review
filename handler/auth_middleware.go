@@ -29,8 +29,14 @@ func AdminMiddleware() gin.HandlerFunc {
 		session := sessions.Default(c)
 		userRole := session.Get("userRole")
 
-		if userRole != model.UserAdmin {
+		if userRole == nil {
 			c.Redirect(302, "/login")
+			c.Abort()
+			return
+		}
+
+		if userRole != model.UserAdmin {
+			c.Redirect(302, "/reviews")
 			c.Abort()
 			return
 		}
