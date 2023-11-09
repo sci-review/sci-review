@@ -96,7 +96,7 @@ func (rh *ReviewHandler) Show(c *gin.Context) {
 	principal := c.MustGet("principal").(*model.Principal)
 	review := c.MustGet("review").(*model.Review)
 
-	investigations, err := rh.InvestigationService.GetAllByReviewID(review.Id)
+	investigations, err := rh.InvestigationService.FindAllByReviewID(review.Id)
 	if err != nil {
 		return
 	}

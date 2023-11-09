@@ -18,7 +18,7 @@ func InvestigationMiddleware(investigationService *service.InvestigationService)
 			c.Abort()
 			return
 		}
-		investigation, err := investigationService.GetById(investigationId, principal.Id)
+		investigation, err := investigationService.FindOneById(investigationId, principal.Id)
 		if err != nil {
 			review := c.MustGet("review").(*model.Review)
 			c.Redirect(302, "/reviews/"+review.Id.String())

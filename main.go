@@ -10,6 +10,7 @@ import (
 	"github.com/patrickmn/go-cache"
 	"golang.org/x/exp/slog"
 	"os"
+	cacheDecorator "sci-review/cache"
 	"sci-review/handler"
 	"sci-review/middleware"
 	"sci-review/repo"
@@ -60,8 +61,9 @@ func main() {
 	organizationService := service.NewOrganizationService(organizationRepo)
 	reviewRepo := repo.NewReviewRepo(db, appCache)
 	reviewService := service.NewReviewService(reviewRepo)
-	investigationRepo := repo.NewInvestigationRepo(db)
-	investigationService := service.NewInvestigationService(investigationRepo)
+	investigationRepoSql := repo.NewInvestigationRepoSql(db)
+	investigationRepoCache := cacheDecorator.NewInvestigationRepoCache(investigationRepoSql, appCache)
+	investigationService := service.NewInvestigationService(investigationRepoCache)
 	slog.Info("services initialized")
 
 	authMiddleware := handler.AuthMiddleware()

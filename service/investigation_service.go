@@ -9,10 +9,10 @@ import (
 )
 
 type InvestigationService struct {
-	InvestigationRepo *repo.InvestigationRepo
+	InvestigationRepo repo.InvestigationRepo
 }
 
-func NewInvestigationService(investigationRepo *repo.InvestigationRepo) *InvestigationService {
+func NewInvestigationService(investigationRepo repo.InvestigationRepo) *InvestigationService {
 	return &InvestigationService{InvestigationRepo: investigationRepo}
 }
 
@@ -27,12 +27,12 @@ func (ps *InvestigationService) Create(data form.InvestigationForm, reviewId uui
 	return investigation, nil
 }
 
-func (ps *InvestigationService) GetAllByReviewID(reviewId uuid.UUID) ([]model.Investigation, error) {
-	return ps.InvestigationRepo.GetAllByReviewID(reviewId)
+func (ps *InvestigationService) FindAllByReviewID(reviewId uuid.UUID) ([]model.Investigation, error) {
+	return ps.InvestigationRepo.FindAll(reviewId)
 }
 
-func (ps *InvestigationService) GetById(investigationId uuid.UUID, userId uuid.UUID) (*model.Investigation, error) {
-	return ps.InvestigationRepo.GetById(investigationId)
+func (ps *InvestigationService) FindOneById(investigationId uuid.UUID, userId uuid.UUID) (*model.Investigation, error) {
+	return ps.InvestigationRepo.FindOne(investigationId)
 }
 
 func (ps *InvestigationService) SaveKeyword(investigationId uuid.UUID, userId uuid.UUID, keywordForm form.KeywordForm) error {

@@ -7,15 +7,23 @@ import (
 	"sci-review/model"
 )
 
-type InvestigationRepo struct {
+type InvestigationRepo interface {
+	Create(model *model.Investigation) error
+	FindAll(reviewID uuid.UUID) ([]model.Investigation, error)
+	FindOne(investigationId uuid.UUID) (*model.Investigation, error)
+	SaveKeyword(investigationKeyword *model.InvestigationKeyword) error
+	GetKeywordsByInvestigationId(investigationId uuid.UUID) ([]model.InvestigationKeyword, error)
+}
+
+type InvestigationRepoSql struct {
 	DB *sqlx.DB
 }
 
-func NewInvestigationRepo(DB *sqlx.DB) *InvestigationRepo {
-	return &InvestigationRepo{DB: DB}
+func NewInvestigationRepoSql(DB *sqlx.DB) *InvestigationRepoSql {
+	return &InvestigationRepoSql{DB: DB}
 }
 
-func (pr *InvestigationRepo) Create(model *model.Investigation) error {
+func (pr *InvestigationRepoSql) Create(model *model.Investigation) error {
 	query := `
 		INSERT INTO investigations (id, user_id, review_id, question, status, created_at, updated_at)
 		VALUES (:id, :user_id, :review_id, :question, :status, :created_at, :updated_at)
@@ -27,7 +35,7 @@ func (pr *InvestigationRepo) Create(model *model.Investigation) error {
 	return nil
 }
 
-func (pr *InvestigationRepo) GetAllByReviewID(reviewID uuid.UUID) ([]model.Investigation, error) {
+func (pr *InvestigationRepoSql) FindAll(reviewID uuid.UUID) ([]model.Investigation, error) {
 	var models []model.Investigation
 	query := `
 		SELECT * FROM investigations WHERE review_id = $1
@@ -39,7 +47,7 @@ func (pr *InvestigationRepo) GetAllByReviewID(reviewID uuid.UUID) ([]model.Inves
 	return models, nil
 }
 
-func (pr *InvestigationRepo) GetById(investigationId uuid.UUID) (*model.Investigation, error) {
+func (pr *InvestigationRepoSql) FindOne(investigationId uuid.UUID) (*model.Investigation, error) {
 	investigation := model.Investigation{}
 	query := `
 		SELECT * FROM investigations WHERE id = $1
@@ -51,7 +59,7 @@ func (pr *InvestigationRepo) GetById(investigationId uuid.UUID) (*model.Investig
 	return &investigation, nil
 }
 
-func (pr *InvestigationRepo) SaveKeyword(investigationKeyword *model.InvestigationKeyword) error {
+func (pr *InvestigationRepoSql) SaveKeyword(investigationKeyword *model.InvestigationKeyword) error {
 	query := `
 		INSERT INTO investigation_keywords (id, user_id, investigation_id, word, synonyms, created_at, updated_at)
 		VALUES (:id, :user_id, :investigation_id, :word, :synonyms, :created_at, :updated_at)
@@ -63,7 +71,7 @@ func (pr *InvestigationRepo) SaveKeyword(investigationKeyword *model.Investigati
 	return nil
 }
 
-func (pr *InvestigationRepo) GetKeywordsByInvestigationId(investigationId uuid.UUID) ([]model.InvestigationKeyword, error) {
+func (pr *InvestigationRepoSql) GetKeywordsByInvestigationId(investigationId uuid.UUID) ([]model.InvestigationKeyword, error) {
 	var keywords []model.InvestigationKeyword
 	query := `SELECT * FROM investigation_keywords WHERE investigation_id = $1`
 	err := pr.DB.Select(&keywords, query, investigationId)
