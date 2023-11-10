@@ -11,10 +11,10 @@ import (
 )
 
 type ReviewService struct {
-	ReviewRepo *repo.ReviewRepo
+	ReviewRepo repo.ReviewRepo
 }
 
-func NewReviewService(reviewRepo *repo.ReviewRepo) *ReviewService {
+func NewReviewService(reviewRepo repo.ReviewRepo) *ReviewService {
 	return &ReviewService{ReviewRepo: reviewRepo}
 }
 
@@ -43,7 +43,7 @@ func (s *ReviewService) Create(data form.ReviewCreateForm, userId uuid.UUID) (*m
 		return nil, ErrorReviewDate
 	}
 
-	tx := s.ReviewRepo.DB.MustBegin()
+	tx := s.ReviewRepo.GetDB().MustBegin()
 	defer tx.Rollback()
 
 	review := model.NewReview(userId, data.Title, data.ReviewType, startDate, endDate)

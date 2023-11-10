@@ -8,11 +8,11 @@ import (
 	"sci-review/repo"
 )
 
-func findAllKey(review uuid.UUID) string {
+func findAllInvestigationKey(review uuid.UUID) string {
 	return "investigation:findAll:" + review.String()
 }
 
-func findOneKey(id uuid.UUID) string {
+func findOneInvestigationKey(id uuid.UUID) string {
 	return "investigation:findOne:" + id.String()
 }
 
@@ -34,14 +34,14 @@ func (rc *InvestigationRepoCache) Create(model *model.Investigation) error {
 		return err
 	}
 
-	rc.AppCache.Delete(findAllKey(model.ReviewId))
+	rc.AppCache.Delete(findAllInvestigationKey(model.ReviewId))
 	slog.Debug("InvestigationRepoCache.Create: cache cleared", "reviewId", model.ReviewId)
 
 	return nil
 }
 
 func (rc *InvestigationRepoCache) FindAll(reviewID uuid.UUID) ([]model.Investigation, error) {
-	value, found := rc.AppCache.Get(findAllKey(reviewID))
+	value, found := rc.AppCache.Get(findAllInvestigationKey(reviewID))
 	if found {
 		slog.Debug("InvestigationRepoCache.FindAll: cache hit", "reviewId", reviewID)
 		return value.([]model.Investigation), nil
@@ -53,14 +53,14 @@ func (rc *InvestigationRepoCache) FindAll(reviewID uuid.UUID) ([]model.Investiga
 		return nil, err
 	}
 
-	rc.AppCache.Set(findAllKey(reviewID), investigations, cache.DefaultExpiration)
+	rc.AppCache.Set(findAllInvestigationKey(reviewID), investigations, cache.DefaultExpiration)
 	slog.Debug("InvestigationRepoCache.FindAll: cache set", "reviewId", reviewID)
 
 	return investigations, nil
 }
 
 func (rc *InvestigationRepoCache) FindOne(investigationId uuid.UUID) (*model.Investigation, error) {
-	value, found := rc.AppCache.Get(findOneKey(investigationId))
+	value, found := rc.AppCache.Get(findOneInvestigationKey(investigationId))
 	if found {
 		slog.Debug("InvestigationRepoCache.FindOne: cache hit", "investigationId", investigationId)
 		return value.(*model.Investigation), nil
@@ -72,7 +72,7 @@ func (rc *InvestigationRepoCache) FindOne(investigationId uuid.UUID) (*model.Inv
 		return nil, err
 	}
 
-	rc.AppCache.Set(findOneKey(investigationId), investigation, cache.DefaultExpiration)
+	rc.AppCache.Set(findOneInvestigationKey(investigationId), investigation, cache.DefaultExpiration)
 	slog.Debug("InvestigationRepoCache.FindOne: cache set", "investigationId", investigationId)
 
 	return investigation, nil
