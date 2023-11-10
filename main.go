@@ -74,8 +74,8 @@ func main() {
 	slog.Info("middleware initialized")
 
 	r := gin.Default()
-	r.LoadHTMLGlob("templates/**/*")
-	r.Static("/assets", "./assets")
+	templateConfig(r)
+	staticFilesConfig(r)
 
 	store := cookie.NewStore([]byte(os.Getenv("SESSION_SECRET")))
 	r.Use(sessions.Sessions(os.Getenv("SESSION_NAME"), store))
@@ -114,4 +114,23 @@ func cacheInit() *cache.Cache {
 
 	slog.Info("Cache initialized", "defaultExpiration in minutes", defaultExpirationMinutes, "cleanupInterval in minutes", cleanupIntervalMinutes)
 	return cache.New(defaultExpiration, cleanupInterval)
+}
+
+func staticFilesConfig(r *gin.Engine) {
+	slog.Info("Configuring static files")
+	r.Static("/assets", "./assets")
+	r.StaticFile("/android-chrome-192x192.png", "./assets/android-chrome-192x192.png")
+	r.StaticFile("/android-chrome-512x512.png", "./assets/android-chrome-512x512.png")
+	r.StaticFile("/apple-touch-icon.png", "./assets/apple-touch-icon.png")
+	r.StaticFile("/favicon-16x16.png", "./assets/favicon-16x16.png")
+	r.StaticFile("/favicon-32x32.png", "./assets/favicon-32x32.png")
+	r.StaticFile("/favicon.ico", "./assets/favicon.ico")
+	r.StaticFile("/site.webmanifest", "./assets/site.webmanifest")
+	slog.Info("Static files configured")
+}
+
+func templateConfig(r *gin.Engine) {
+	slog.Info("Configuring templates")
+	r.LoadHTMLGlob("templates/**/*")
+	slog.Info("Templates configured")
 }
