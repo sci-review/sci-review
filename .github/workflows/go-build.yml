@@ -1,5 +1,11 @@
 name: Go build
 
+env:
+  SERVER_URL: ${{ secrets.SERVER_URL }}
+  SERVER_PATH: ${{ secrets.SERVER_PATH }}
+  PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+  PRIVATE_KEY_NAME: ${{ secrets.PRIVATE_KEY_NAME }}
+
 on:
   push:
     branches: [ "develop" ]
@@ -22,5 +28,12 @@ jobs:
       run: go get .
       
     - name: Build
-      run: go build -v .
-      
+      run: go build -v -o sci_review_app .
+
+    - name: Deploy
+      run: |
+        echo "$PRIVATE_KEY" > ${PRIVATE_KEY_NAME}
+        chmod 600 ${PRIVATE_KEY_NAME}
+        scp -i "$PRIVATE_KEY_NAME" -o StrictHostKeyChecking=no -v ./sci_review_app ${SERVER_URL}:${SERVER_PATH}
+        scp -i "$PRIVATE_KEY_NAME" -o StrictHostKeyChecking=no -r ./templates ${SERVER_URL}:${SERVER_PATH}
+        scp -i "$PRIVATE_KEY_NAME" -o StrictHostKeyChecking=no -r ./assets ${SERVER_URL}:${SERVER_PATH}
