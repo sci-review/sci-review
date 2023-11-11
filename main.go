@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
@@ -23,14 +24,14 @@ import (
 )
 
 func main() {
-	slog.Info("starting application")
+	slog.Info("Starting application")
 
 	err := godotenv.Load()
 	if err != nil {
 		slog.Error(err.Error())
 		return
 	}
-	slog.Info("environment variables loaded")
+	slog.Info("Environment variables loaded")
 
 	appEnv := os.Getenv("APP_ENV")
 	logLevel := slog.LevelDebug
@@ -47,13 +48,11 @@ func main() {
 	slog.SetDefault(logger)
 	slog.Info("logger initialized")
 
-	dataSourceName := os.Getenv("DATABASE_URL")
-	db, err := sqlx.Connect("pgx", dataSourceName)
+	db, err := connectDbWithRetries(5, 7*time.Second)
 	if err != nil {
 		slog.Error(err.Error())
 		return
 	}
-	slog.Info("database connected established")
 
 	err = execMigrations(db)
 	if err != nil {
@@ -142,6 +141,29 @@ func templateConfig(r *gin.Engine) {
 	slog.Info("Configuring templates")
 	r.LoadHTMLGlob("templates/**/*")
 	slog.Info("Templates configured")
+}
+
+func connectDbWithRetries(maxRetries int, retryInterval time.Duration) (*sqlx.DB, error) {
+	var db *sqlx.DB
+	var err error
+
+	dataSourceName := os.Getenv("DATABASE_URL")
+
+	for attempt := 1; attempt <= maxRetries; attempt++ {
+		db, err = sqlx.Connect("pgx", dataSourceName)
+		if err == nil {
+			slog.Info("Database connected established")
+			return db, nil
+		}
+
+		slog.Error("Failed to connect to the database", "attempt", attempt, "maxRetries", maxRetries, "error", err.Error())
+		if attempt < maxRetries {
+			time.Sleep(retryInterval)
+		}
+	}
+	slog.Error("Failed to connect to the database after multiple attempts")
+
+	return nil, errors.New("failed to connect to the database after multiple attempts")
 }
 
 func execMigrations(db *sqlx.DB) error {
