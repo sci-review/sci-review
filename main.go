@@ -4,6 +4,9 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
@@ -51,6 +54,12 @@ func main() {
 		return
 	}
 	slog.Info("database connected established")
+
+	err = execMigrations(db)
+	if err != nil {
+		slog.Error(err.Error())
+		return
+	}
 
 	appCache := cacheInit()
 	userRepo := repo.NewUserRepo(db)
@@ -133,4 +142,26 @@ func templateConfig(r *gin.Engine) {
 	slog.Info("Configuring templates")
 	r.LoadHTMLGlob("templates/**/*")
 	slog.Info("Templates configured")
+}
+
+func execMigrations(db *sqlx.DB) error {
+	slog.Info("Migrating database")
+
+	driver, err := postgres.WithInstance(db.DB, &postgres.Config{})
+	if err != nil {
+		return err
+	}
+
+	m, err := migrate.NewWithDatabaseInstance("file://db/migrations", "postgres", driver)
+	if err != nil {
+		return err
+	}
+
+	err = m.Up()
+	if err != nil && err != migrate.ErrNoChange {
+		return err
+	}
+
+	slog.Info("Database migrated")
+	return nil
 }
