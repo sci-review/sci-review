@@ -133,3 +133,22 @@ func (us *UserService) checkIsAdmin(loggedUserId uuid.UUID) (*model.User, error)
 
 	return loggedUser, nil
 }
+
+func (us *UserService) CreateAdminUser(name string, email string, password string) error {
+	userFounded, _ := us.UserRepo.GetByEmail(email)
+	if userFounded != nil {
+		slog.Info("user create admin", "admin already exists", "email", email)
+		return nil
+	}
+
+	user := model.NewUser(name, email, password)
+	user.Role = model.UserAdmin
+	user.Active = true
+	err := us.UserRepo.Create(user)
+	if err != nil {
+		slog.Error("user create admin", "error", err.Error(), "email", email)
+		return common.DbInternalError
+	}
+	slog.Info("user create admin", "result", "success", "email", email)
+	return nil
+}

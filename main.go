@@ -75,6 +75,9 @@ func main() {
 	investigationService := service.NewInvestigationService(investigationRepoCache)
 	slog.Info("services initialized")
 
+	createAdminUser(userService)
+	slog.Info("admin user created")
+
 	authMiddleware := handler.AuthMiddleware()
 	adminMiddleware := handler.AdminMiddleware()
 	reviewMiddleware := middleware.ReviewMiddleware(reviewService)
@@ -186,4 +189,17 @@ func execMigrations(db *sqlx.DB) error {
 
 	slog.Info("Database migrated")
 	return nil
+}
+
+func createAdminUser(userService *service.UserService) {
+	slog.Info("Creating admin user")
+	adminName := os.Getenv("ADMIN_NAME")
+	adminEmail := os.Getenv("ADMIN_EMAIL")
+	adminPassword := os.Getenv("ADMIN_PASSWORD")
+
+	err := userService.CreateAdminUser(adminName, adminEmail, adminPassword)
+	if err != nil {
+		slog.Error("Error creating admin user", "error", err.Error())
+		return
+	}
 }
