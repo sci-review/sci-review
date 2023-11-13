@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/exp/slog"
 	"sci-review/common"
@@ -19,9 +20,19 @@ func NewAuthService(userRepo *repo.UserRepo, loginAttemptRepo *repo.LoginAttempt
 }
 
 func (as AuthService) Login(data form.LoginAttemptData) (*model.User, error) {
-	var tx = as.LoginAttemptRepo.DB.MustBegin()
+	tx, err := as.LoginAttemptRepo.DB.Beginx()
+	if err != nil {
+		slog.Error("login", "error", err)
+		return nil, common.DbInternalError
+	}
 
-	userFounded, _ := as.UserRepo.GetByEmail(data.Email)
+	userFounded, err := as.UserRepo.GetByEmail(data.Email)
+	if err != nil {
+		if !errors.Is(repo.NotFoundInRepo, err) {
+			slog.Error("login", "error", err)
+			return nil, common.DbInternalError
+		}
+	}
 	if userFounded == nil {
 		loginAttempt := model.NewUnSuccessLoginAttempt(data.Email, data.IPAddress, data.UserAgent)
 		logErr := as.LoginAttemptRepo.Log(loginAttempt, tx)
@@ -52,7 +63,7 @@ func (as AuthService) Login(data form.LoginAttemptData) (*model.User, error) {
 		return nil, ErrorUserNotActive
 	}
 
-	err := bcrypt.CompareHashAndPassword([]byte(userFounded.Password), []byte(data.Password))
+	err = bcrypt.CompareHashAndPassword([]byte(userFounded.Password), []byte(data.Password))
 	if err != nil {
 		loginAttempt := model.NewUnSuccessLoginAttempt(data.Email, data.IPAddress, data.UserAgent)
 		logErr := as.LoginAttemptRepo.Log(loginAttempt, tx)

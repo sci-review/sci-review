@@ -28,14 +28,20 @@ func NewUserService(userRepo *repo.UserRepo) *UserService {
 }
 
 func (us *UserService) Create(userCreateForm form.UserCreateForm) (*model.User, error) {
-	userFounded, _ := us.UserRepo.GetByEmail(userCreateForm.Email)
+	userFounded, err := us.UserRepo.GetByEmail(userCreateForm.Email)
+	if err != nil {
+		if !errors.Is(repo.NotFoundInRepo, err) {
+			slog.Error("user create", "error", err)
+			return nil, common.DbInternalError
+		}
+	}
 	if userFounded != nil {
 		slog.Warn("user create", "error", "user already exists", "userData", userCreateForm)
 		return nil, ErrorUserAlreadyExists
 	}
 
 	user := model.NewUser(userCreateForm.Name, userCreateForm.Email, userCreateForm.Password)
-	err := us.UserRepo.Create(user)
+	err = us.UserRepo.Create(user)
 	if err != nil {
 		slog.Error("user create", "error", err.Error(), "userData", userCreateForm)
 		return nil, common.DbInternalError
@@ -66,8 +72,10 @@ func (us *UserService) Activate(loggedUserId uuid.UUID, userId uuid.UUID) error 
 
 	user, err := us.UserRepo.GetById(userId)
 	if err != nil {
-		slog.Warn("user activate", "error", "user not found", "user", userId)
-		return err
+		if !errors.Is(err, repo.NotFoundInRepo) {
+			slog.Warn("user activate", "error", "user not found", "user", userId)
+			return common.DbInternalError
+		}
 	}
 
 	if user.Active {
@@ -94,8 +102,10 @@ func (us *UserService) Deactivate(loggedUserId uuid.UUID, userId uuid.UUID) erro
 
 	user, err := us.UserRepo.GetById(userId)
 	if err != nil {
-		slog.Warn("user deactivate", "error", "user not found", "user", userId)
-		return err
+		if !errors.Is(err, repo.NotFoundInRepo) {
+			slog.Warn("user deactivate", "error", "user not found", "user", userId)
+			return err
+		}
 	}
 
 	if !user.Active {
@@ -117,8 +127,13 @@ func (us *UserService) Deactivate(loggedUserId uuid.UUID, userId uuid.UUID) erro
 func (us *UserService) checkIsAdmin(loggedUserId uuid.UUID) (*model.User, error) {
 	loggedUser, err := us.UserRepo.GetById(loggedUserId)
 	if err != nil {
-		slog.Warn("user check", "error", "logged user not found", "loggedUserId", loggedUserId)
-		return nil, err
+		if errors.Is(err, repo.NotFoundInRepo) {
+			slog.Warn("user check", "error", "logged user not found", "loggedUserId", loggedUserId)
+			return nil, ErrorUserNotFound
+		} else {
+			slog.Warn("user check", "error", err, "loggedUserId", loggedUserId)
+			return nil, common.DbInternalError
+		}
 	}
 
 	if !loggedUser.Active {
@@ -135,20 +150,26 @@ func (us *UserService) checkIsAdmin(loggedUserId uuid.UUID) (*model.User, error)
 }
 
 func (us *UserService) CreateAdminUser(name string, email string, password string) error {
-	userFounded, _ := us.UserRepo.GetByEmail(email)
+	userFounded, err := us.UserRepo.GetByEmail(email)
+	if err != nil {
+		if !errors.Is(repo.NotFoundInRepo, err) {
+			slog.Error("create admin user", "error", err)
+			return common.DbInternalError
+		}
+	}
 	if userFounded != nil {
-		slog.Info("user create admin", "admin already exists", "email", email)
-		return nil
+		slog.Info("create admin user", "admin already exists", "email", email)
+		return ErrorUserAlreadyExists
 	}
 
 	user := model.NewUser(name, email, password)
 	user.Role = model.UserAdmin
 	user.Active = true
-	err := us.UserRepo.Create(user)
+	err = us.UserRepo.Create(user)
 	if err != nil {
-		slog.Error("user create admin", "error", err.Error(), "email", email)
+		slog.Error("create admin user", "error", err.Error(), "email", email)
 		return common.DbInternalError
 	}
-	slog.Info("user create admin", "result", "success", "email", email)
+	slog.Info("create admin user", "result", "success", "email", email)
 	return nil
 }

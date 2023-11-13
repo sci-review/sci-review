@@ -57,11 +57,22 @@ func (ah *AuthHandler) Login(c *gin.Context) {
 	if err != nil {
 		slog.Warn("login", "error", err.Error())
 
-		if errors.Is(err, service.ErrorUserNotActive) {
-			pageData.Message = "User not active"
-		} else {
+		switch {
+		case errors.Is(err, service.ErrorUserNotFound):
 			pageData.Message = "Invalid email or password"
+		case errors.Is(err, service.ErrorUserNotActive):
+			pageData.Message = "User not active"
+		case errors.Is(err, common.DbInternalError):
+			pageData.Message = "Db Internal Error"
+		default:
+			pageData.Message = "Internal Error"
 		}
+
+		//if errors.Is(err, service.ErrorUserNotActive) {
+		//	pageData.Message = "User not active"
+		//} else {
+		//	pageData.Message = "Invalid email or password"
+		//}
 
 		c.HTML(409, "users/login.html", gin.H{
 			"pageData":  pageData,

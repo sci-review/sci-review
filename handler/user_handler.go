@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/exp/slog"
 	"sci-review/common"
@@ -25,7 +26,7 @@ func (uh *UserHandler) Create(c *gin.Context) {
 	if err := c.ShouldBind(&userCreateForm); err != nil {
 		slog.Warn("user create", "error", err.Error())
 		pageData.Message = "Invalid form data"
-		c.HTML(200, "users/register.html", gin.H{
+		c.HTML(400, "users/register.html", gin.H{
 			"pageData":       pageData,
 			"userCreateForm": userCreateForm,
 		})
@@ -36,7 +37,7 @@ func (uh *UserHandler) Create(c *gin.Context) {
 	if err := common.Validate(userCreateForm); len(err) > 0 {
 		slog.Warn("user create", "error", "validation error")
 		pageData.Errors = err
-		c.HTML(200, "users/register.html", gin.H{
+		c.HTML(400, "users/register.html", gin.H{
 			"pageData":       pageData,
 			"userCreateForm": userCreateForm,
 		})
@@ -45,7 +46,12 @@ func (uh *UserHandler) Create(c *gin.Context) {
 
 	_, err := uh.UserService.Create(*userCreateForm)
 	if err != nil {
-		pageData.Message = "Email already exists"
+		if errors.Is(common.DbInternalError, err) {
+			pageData.Message = "Internal Error"
+		}
+		if errors.Is(service.ErrorUserAlreadyExists, err) {
+			pageData.Message = "Account with this e-mail already exists"
+		}
 		c.HTML(409, "users/register.html", gin.H{
 			"pageData":       pageData,
 			"userCreateForm": userCreateForm,

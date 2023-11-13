@@ -30,6 +30,9 @@ func (ur *UserRepo) GetByEmail(email string) (*model.User, error) {
 	user := model.User{}
 	err := ur.DB.Get(&user, "SELECT * FROM users WHERE email = $1 LIMIT 1", email)
 	if err != nil {
+		if err.Error() == "sql: no rows in result set" {
+			return nil, NotFoundInRepo
+		}
 		return nil, err
 	}
 	return &user, nil
@@ -39,6 +42,9 @@ func (ur *UserRepo) GetById(id uuid.UUID) (*model.User, error) {
 	user := model.User{}
 	err := ur.DB.Get(&user, "SELECT * FROM users WHERE id = $1 LIMIT 1", id)
 	if err != nil {
+		if err.Error() == "sql: no rows in result set" {
+			return nil, NotFoundInRepo
+		}
 		return nil, err
 	}
 	return &user, nil

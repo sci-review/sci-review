@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"golang.org/x/exp/slog"
@@ -28,7 +29,13 @@ func (ah *AdminHandler) Index(c *gin.Context) {
 
 	users, err := ah.UserService.FindAll(principal.Id)
 	if err != nil {
-		c.AbortWithStatus(500)
+		if errors.Is(err, common.DbInternalError) {
+			pageData.Message = "Internal error"
+			c.HTML(500, "admin/users.html", gin.H{
+				"pageData": pageData,
+				"users":    users,
+			})
+		}
 		return
 	}
 
