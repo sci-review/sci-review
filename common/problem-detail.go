@@ -40,5 +40,15 @@ func ProblemWithErrors(errors []Field) *ProblemDetail {
 		Instance: "",
 		Fields:   errors,
 	}
+}
 
+func NewInternalError() *ProblemDetail {
+	return &ProblemDetail{
+		Type:     "",
+		Title:    "Internal Error",
+		Status:   500,
+		Detail:   "Internal Error",
+		Instance: "",
+		Fields:   []Field{},
+	}
 }

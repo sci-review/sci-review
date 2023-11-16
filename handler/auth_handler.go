@@ -2,7 +2,6 @@ package handler
 
 import (
 	"errors"
-	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/exp/slog"
 	"sci-review/common"
@@ -19,29 +18,17 @@ func NewAuthHandler(authService *service.AuthService) *AuthHandler {
 }
 
 func (ah *AuthHandler) Login(c *gin.Context) {
-	pageData := common.PageData{
-		Title:   "Login",
-		Active:  "login",
-		Message: "",
-	}
-
 	loginForm := new(form.LoginForm)
 	if err := c.ShouldBind(&loginForm); err != nil {
-		pageData.Message = "Invalid form data"
-		c.HTML(200, "users/login.html", gin.H{
-			"pageData":  pageData,
-			"loginForm": loginForm,
-		})
+		slog.Warn("login", "error", err.Error())
+		c.JSON(400, common.InvalidJson())
 		return
 	}
+	slog.Info("login", "data", loginForm)
 
 	if err := common.Validate(loginForm); len(err) > 0 {
 		slog.Warn("login", "error", "validation error")
-		pageData.Errors = err
-		c.HTML(200, "users/login.html", gin.H{
-			"pageData":  pageData,
-			"loginForm": loginForm,
-		})
+		c.JSON(400, common.ProblemWithErrors(err))
 		return
 	}
 
@@ -53,72 +40,43 @@ func (ah *AuthHandler) Login(c *gin.Context) {
 	}
 	slog.Info("login", "data", loginAttemptData)
 
-	userLogged, err := ah.AuthService.Login(loginAttemptData)
+	tokenResponse, err := ah.AuthService.Login(loginAttemptData)
 	if err != nil {
 		slog.Warn("login", "error", err.Error())
-
 		switch {
 		case errors.Is(err, service.ErrorUserNotFound):
-			pageData.Message = "Invalid email or password"
+			c.JSON(409, common.NewProblemDetail("Invalid email or password", 409))
+		case errors.Is(err, service.ErrorPasswordIsNotValid):
+			c.JSON(409, common.NewProblemDetail("Invalid email or password", 409))
 		case errors.Is(err, service.ErrorUserNotActive):
-			pageData.Message = "User not active"
+			c.JSON(409, common.NewProblemDetail("User not active", 409))
 		case errors.Is(err, common.DbInternalError):
-			pageData.Message = "Db Internal Error"
+			c.JSON(500, common.NewInternalError())
 		default:
-			pageData.Message = "Internal Error"
+			c.JSON(500, common.NewInternalError())
 		}
-
-		//if errors.Is(err, service.ErrorUserNotActive) {
-		//	pageData.Message = "User not active"
-		//} else {
-		//	pageData.Message = "Invalid email or password"
-		//}
-
-		c.HTML(409, "users/login.html", gin.H{
-			"pageData":  pageData,
-			"loginForm": loginForm,
-		})
 		return
 	}
 	slog.Info("login", "result", "success")
 
-	session := sessions.Default(c)
-	session.Set("userId", userLogged.Id.String())
-	session.Set("userRole", string(userLogged.Role))
-	session.Save()
-
-	c.Redirect(302, "reviews")
+	c.JSON(201, tokenResponse)
 }
 
-func (ah *AuthHandler) LoginForm(c *gin.Context) {
-	from := c.Query("from")
-	pageData := common.PageData{
-		Title:   "Login",
-		Active:  "login",
-		Message: "",
-	}
-	c.HTML(200, "users/login.html", gin.H{
-		"pageData": pageData,
-		"from":     from,
-	})
-}
-
-func (ah *AuthHandler) Logout(c *gin.Context) {
-	session := sessions.Default(c)
-	session.Clear()
-	err := session.Save()
-	if err != nil {
-		slog.Error("logout", "error", err.Error())
-		c.AbortWithStatus(500)
-	}
-	c.Redirect(302, "/login")
-}
+//func (ah *AuthHandler) Logout(c *gin.Context) {
+//	session := sessions.Default(c)
+//	session.Clear()
+//	err := session.Save()
+//	if err != nil {
+//		slog.Error("logout", "error", err.Error())
+//		c.AbortWithStatus(500)
+//	}
+//	c.Redirect(302, "/login")
+//}
 
 func RegisterAuthHandler(r *gin.Engine, authService *service.AuthService) {
 	slog.Info("middleware handler", "status", "registering")
 	authHandler := NewAuthHandler(authService)
-	r.GET("/login", authHandler.LoginForm)
-	r.POST("/login", authHandler.Login)
-	r.GET("/logout", authHandler.Logout)
+	r.POST("/api/login", authHandler.Login)
+	//r.GET("/api/logout", authHandler.Logout)
 	slog.Info("middleware handler", "status", "registered")
 }

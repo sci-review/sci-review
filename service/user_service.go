@@ -21,6 +21,7 @@ var (
 	ErrorUserNotActive         = errors.New("user not active")
 	ErrorUserAlreadyActive     = errors.New("user already active")
 	ErrorUserAlreadyDeactivate = errors.New("user already deactivate")
+	ErrorPasswordIsNotValid    = errors.New("password is not valid")
 )
 
 func NewUserService(userRepo *repo.UserRepo) *UserService {

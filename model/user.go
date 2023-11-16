@@ -14,8 +14,8 @@ type User struct {
 	Password  string    `db:"password" json:"-"`
 	Role      UserRole  `db:"role" json:"role"`
 	Active    bool      `db:"active" json:"active"`
-	CreatedAt time.Time `db:"created_at" json:"created_at"`
-	UpdatedAt time.Time `db:"updated_at" json:"updated_at"`
+	CreatedAt time.Time `db:"created_at" json:"createdAt"`
+	UpdatedAt time.Time `db:"updated_at" json:"updatedAt"`
 }
 
 func NewUser(name string, email string, password string) *User {
