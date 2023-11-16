@@ -62,21 +62,44 @@ func (ah *AuthHandler) Login(c *gin.Context) {
 	c.JSON(201, tokenResponse)
 }
 
-//func (ah *AuthHandler) Logout(c *gin.Context) {
-//	session := sessions.Default(c)
-//	session.Clear()
-//	err := session.Save()
-//	if err != nil {
-//		slog.Error("logout", "error", err.Error())
-//		c.AbortWithStatus(500)
-//	}
-//	c.Redirect(302, "/login")
-//}
+func (ah *AuthHandler) Logout(c *gin.Context) {
+	logoutForm := new(form.LogoutForm)
+	if err := c.ShouldBind(&logoutForm); err != nil {
+		slog.Warn("logout", "error", err.Error())
+		c.JSON(400, common.InvalidJson())
+		return
+	}
+
+	if err := common.Validate(logoutForm); len(err) > 0 {
+		slog.Warn("logout", "error", "validation error")
+		c.JSON(400, common.ProblemWithErrors(err))
+		return
+	}
+
+	err := ah.AuthService.Logout(logoutForm)
+	if err != nil {
+		slog.Warn("logout", "error", err.Error())
+		switch {
+		case errors.Is(err, service.ErrorParsingToken):
+			c.JSON(400, common.NewProblemDetail("Error parsing token", 400))
+		case errors.Is(err, service.ErrorRefreshTokenNotFound):
+			c.JSON(409, common.NewProblemDetail("Refresh token not found", 409))
+		case errors.Is(err, common.DbInternalError):
+			c.JSON(500, common.NewInternalError())
+		default:
+			c.JSON(500, common.NewInternalError())
+		}
+		return
+	}
+	slog.Info("login", "result", "success")
+
+	c.JSON(204, nil)
+}
 
 func RegisterAuthHandler(r *gin.Engine, authService *service.AuthService) {
 	slog.Info("middleware handler", "status", "registering")
 	authHandler := NewAuthHandler(authService)
 	r.POST("/api/login", authHandler.Login)
-	//r.GET("/api/logout", authHandler.Logout)
+	r.POST("/api/logout", authHandler.Logout)
 	slog.Info("middleware handler", "status", "registered")
 }

@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/exp/slog"
@@ -34,6 +35,11 @@ type TokenResponse struct {
 func NewTokenResponse(user model.User, accessToken string, refreshToken string) *TokenResponse {
 	return &TokenResponse{User: user, AccessToken: accessToken, RefreshToken: refreshToken}
 }
+
+var (
+	ErrorParsingToken         = errors.New("error parsing token")
+	ErrorRefreshTokenNotFound = errors.New("refresh token not found")
+)
 
 func (as AuthService) Login(data form.LoginAttemptData) (*TokenResponse, error) {
 	tx, err := as.LoginAttemptRepo.DB.Beginx()
@@ -140,4 +146,37 @@ func (as AuthService) Login(data form.LoginAttemptData) (*TokenResponse, error) 
 	)
 
 	return tokenResponse, nil
+}
+
+func (as AuthService) Logout(logoutForm *form.LogoutForm) error {
+	token, err := ParseToken(logoutForm.RefreshToken)
+	if err != nil {
+		return ErrorParsingToken
+	}
+
+	tokenId, err := uuid.Parse(token.Claims.(jwt.MapClaims)["jti"].(string))
+	if err != nil {
+		return ErrorParsingToken
+	}
+
+	refreshToken, err := as.RefreshTokenRepo.GetById(tokenId)
+	if err != nil {
+		if !errors.Is(repo.NotFoundInRepo, err) {
+			slog.Error("logout", "error", err)
+			return common.DbInternalError
+		}
+	}
+	if refreshToken == nil {
+		slog.Warn("logout", "error", "refresh token not found", "data", logoutForm)
+		return ErrorRefreshTokenNotFound
+	}
+
+	if err := as.RefreshTokenRepo.InvalidateRefreshToken(tokenId); err != nil {
+		slog.Error("logout", "error", err)
+		return common.DbInternalError
+	}
+
+	slog.Info("logout", "result", "success", "data", logoutForm)
+
+	return nil
 }
