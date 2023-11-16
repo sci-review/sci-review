@@ -6,6 +6,6 @@ type PageData struct {
 	Title   string
 	Active  string
 	Message string
-	Errors  []ErrorResponse
+	Errors  []Field
 	User    *model.Principal
 }

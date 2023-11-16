@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
@@ -87,6 +88,7 @@ func main() {
 	r := gin.Default()
 	templateConfig(r)
 	staticFilesConfig(r)
+	configCors(r)
 
 	store := cookie.NewStore([]byte(os.Getenv("SESSION_SECRET")))
 	r.Use(sessions.Sessions(os.Getenv("SESSION_NAME"), store))
@@ -102,6 +104,12 @@ func main() {
 	slog.Info("routes registered")
 
 	r.Run(os.Getenv("PORT"))
+}
+
+func configCors(r *gin.Engine) {
+	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{os.Getenv("FRONTEND_URL")}
+	r.Use(cors.New(config))
 }
 
 func cacheInit() *cache.Cache {

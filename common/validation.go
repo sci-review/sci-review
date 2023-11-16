@@ -6,8 +6,8 @@ import (
 	"strings"
 )
 
-type ErrorResponse struct {
-	Field string `json:"field"`
+type Field struct {
+	Name  string `json:"name"`
 	Error string `json:"error"`
 }
 
@@ -39,19 +39,19 @@ var errorMessages = map[string]string{
 	"uuid":        "%s must be a valid UUID",
 }
 
-func Validate(data interface{}) []ErrorResponse {
-	validationErrors := []ErrorResponse{}
+func Validate(data interface{}) []Field {
+	validationErrors := []Field{}
 
 	validate := validator.New(validator.WithRequiredStructEnabled())
 	errs := validate.Struct(data)
 
 	if errs != nil {
 		for _, err := range errs.(validator.ValidationErrors) {
-			var elem ErrorResponse
+			var elem Field
 
 			fieldName := err.Field()
-			elem.Field = strings.ToLower(fieldName[:1]) + fieldName[1:]
-			elem.Error = fmt.Sprintf(errorMessages[err.Tag()], elem.Field, err.Param())
+			elem.Name = strings.ToLower(fieldName[:1]) + fieldName[1:]
+			elem.Error = fmt.Sprintf(errorMessages[err.Tag()], elem.Name, err.Param())
 			elem.Error = strings.TrimSuffix(elem.Error, "%!(EXTRA string=)")
 
 			validationErrors = append(validationErrors, elem)
