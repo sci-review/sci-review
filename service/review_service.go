@@ -12,10 +12,11 @@ import (
 
 type ReviewService struct {
 	ReviewRepo repo.ReviewRepo
+	UserRepo   *repo.UserRepo
 }
 
-func NewReviewService(reviewRepo repo.ReviewRepo) *ReviewService {
-	return &ReviewService{ReviewRepo: reviewRepo}
+func NewReviewService(reviewRepo repo.ReviewRepo, userRepo *repo.UserRepo) *ReviewService {
+	return &ReviewService{ReviewRepo: reviewRepo, UserRepo: userRepo}
 }
 
 var (
@@ -26,13 +27,13 @@ var (
 )
 
 func (s *ReviewService) Create(data form.ReviewCreateForm, userId uuid.UUID) (*model.Review, error) {
-	startDate, err := time.Parse("2006-01-02", data.StartDate)
+	startDate, err := time.Parse(time.RFC3339, data.StartDate)
 	if err != nil {
 		slog.Error(err.Error())
 		return nil, ErrorParseStartDate
 	}
 
-	endDate, err := time.Parse("2006-01-02", data.EndDate)
+	endDate, err := time.Parse(time.RFC3339, data.EndDate)
 	if err != nil {
 		slog.Error(err.Error())
 		return nil, ErrorParseEndDate
@@ -41,6 +42,16 @@ func (s *ReviewService) Create(data form.ReviewCreateForm, userId uuid.UUID) (*m
 	if endDate.Before(startDate) || endDate.Equal(startDate) {
 		slog.Error("end date must be after start date")
 		return nil, ErrorReviewDate
+	}
+
+	user, err := s.UserRepo.GetById(userId)
+	if err != nil {
+		return nil, err
+	}
+
+	if !user.Active {
+		slog.Error("create review", "error", "user not active", "user", user)
+		return nil, ErrorUserNotActive
 	}
 
 	tx := s.ReviewRepo.GetDB().MustBegin()

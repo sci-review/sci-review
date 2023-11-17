@@ -61,6 +61,9 @@ func (r *ReviewRepoSql) FindAllByUserId(userId uuid.UUID) (*[]model.Review, erro
 		return nil, err
 	}
 
+	if len(reviews) == 0 {
+		return &[]model.Review{}, nil
+	}
 	return &reviews, nil
 }
 

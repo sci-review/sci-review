@@ -71,7 +71,7 @@ func main() {
 	organizationService := service.NewOrganizationService(organizationRepo)
 	reviewRepoSql := repo.NewReviewRepoSql(db)
 	reviewRepoCache := cacheDecorator.NewReviewRepoCache(reviewRepoSql, appCache)
-	reviewService := service.NewReviewService(reviewRepoCache)
+	reviewService := service.NewReviewService(reviewRepoCache, userRepo)
 	investigationRepoSql := repo.NewInvestigationRepoSql(db)
 	investigationRepoCache := cacheDecorator.NewInvestigationRepoCache(investigationRepoSql, appCache)
 	investigationService := service.NewInvestigationService(investigationRepoCache)
