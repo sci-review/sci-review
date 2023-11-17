@@ -80,6 +80,7 @@ func main() {
 	createAdminUser(userService)
 	slog.Info("admin user created")
 
+	tokenMiddleware := middleware.TokenMiddleware()
 	authMiddleware := handler.AuthMiddleware()
 	adminMiddleware := handler.AdminMiddleware()
 	reviewMiddleware := middleware.ReviewMiddleware(reviewService)
@@ -99,7 +100,7 @@ func main() {
 	handler.RegisterUserHandler(r, userService)
 	handler.RegisterAdminHandler(r, userService, authMiddleware, adminMiddleware)
 	handler.RegisterOrganizationHandler(r, organizationService, authMiddleware)
-	handler.RegisterReviewHandler(r, reviewService, investigationService, authMiddleware, reviewMiddleware, investigationMiddleware)
+	handler.RegisterReviewHandler(r, reviewService, investigationService, tokenMiddleware, reviewMiddleware, investigationMiddleware)
 	handler.RegisterInvestigationHandler(r, reviewService, investigationService, authMiddleware, reviewMiddleware, investigationMiddleware)
 
 	slog.Info("routes registered")
@@ -110,6 +111,7 @@ func main() {
 func configCors(r *gin.Engine) {
 	config := cors.DefaultConfig()
 	config.AllowOrigins = []string{os.Getenv("FRONTEND_URL")}
+	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization"}
 	r.Use(cors.New(config))
 }
 

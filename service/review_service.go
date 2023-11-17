@@ -46,7 +46,7 @@ func (s *ReviewService) Create(data form.ReviewCreateForm, userId uuid.UUID) (*m
 	tx := s.ReviewRepo.GetDB().MustBegin()
 	defer tx.Rollback()
 
-	review := model.NewReview(userId, data.Title, data.ReviewType, startDate, endDate)
+	review := model.NewReview(userId, data.Title, data.Type, startDate, endDate)
 	err = s.ReviewRepo.Create(review, tx)
 	if err != nil {
 		slog.Error(err.Error())

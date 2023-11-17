@@ -27,7 +27,7 @@ func (ps *InvestigationService) Create(data form.InvestigationForm, reviewId uui
 	return investigation, nil
 }
 
-func (ps *InvestigationService) FindAllByReviewID(reviewId uuid.UUID) ([]model.Investigation, error) {
+func (ps *InvestigationService) FindAllByReviewID(reviewId uuid.UUID, userId uuid.UUID) ([]model.Investigation, error) {
 	return ps.InvestigationRepo.FindAll(reviewId)
 }
 
