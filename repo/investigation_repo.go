@@ -9,7 +9,7 @@ import (
 
 type InvestigationRepo interface {
 	Create(model *model.Investigation) error
-	FindAll(reviewID uuid.UUID) ([]model.Investigation, error)
+	FindAll(reviewID uuid.UUID) (*[]model.Investigation, error)
 	FindOne(investigationId uuid.UUID) (*model.Investigation, error)
 	SaveKeyword(investigationKeyword *model.InvestigationKeyword) error
 	GetKeywordsByInvestigationId(investigationId uuid.UUID) ([]model.InvestigationKeyword, error)
@@ -35,16 +35,21 @@ func (pr *InvestigationRepoSql) Create(model *model.Investigation) error {
 	return nil
 }
 
-func (pr *InvestigationRepoSql) FindAll(reviewID uuid.UUID) ([]model.Investigation, error) {
-	var models []model.Investigation
+func (pr *InvestigationRepoSql) FindAll(reviewID uuid.UUID) (*[]model.Investigation, error) {
+	var investigations []model.Investigation
 	query := `
 		SELECT * FROM investigations WHERE review_id = $1
 	`
-	err := pr.DB.Select(&models, query, reviewID)
+	err := pr.DB.Select(&investigations, query, reviewID)
 	if err != nil {
 		return nil, err
 	}
-	return models, nil
+
+	if len(investigations) == 0 {
+		return &[]model.Investigation{}, nil
+	}
+
+	return &investigations, nil
 }
 
 func (pr *InvestigationRepoSql) FindOne(investigationId uuid.UUID) (*model.Investigation, error) {

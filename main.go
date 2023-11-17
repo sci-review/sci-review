@@ -101,7 +101,7 @@ func main() {
 	handler.RegisterAdminHandler(r, userService, authMiddleware, adminMiddleware)
 	handler.RegisterOrganizationHandler(r, organizationService, authMiddleware)
 	handler.RegisterReviewHandler(r, reviewService, investigationService, tokenMiddleware, reviewMiddleware, investigationMiddleware)
-	handler.RegisterInvestigationHandler(r, reviewService, investigationService, authMiddleware, reviewMiddleware, investigationMiddleware)
+	handler.RegisterInvestigationHandler(r, reviewService, investigationService, tokenMiddleware, reviewMiddleware, investigationMiddleware)
 
 	slog.Info("routes registered")
 

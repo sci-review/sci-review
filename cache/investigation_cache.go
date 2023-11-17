@@ -40,11 +40,11 @@ func (rc *InvestigationRepoCache) Create(model *model.Investigation) error {
 	return nil
 }
 
-func (rc *InvestigationRepoCache) FindAll(reviewID uuid.UUID) ([]model.Investigation, error) {
+func (rc *InvestigationRepoCache) FindAll(reviewID uuid.UUID) (*[]model.Investigation, error) {
 	value, found := rc.AppCache.Get(findAllInvestigationKey(reviewID))
 	if found {
 		slog.Debug("InvestigationRepoCache.FindAll: cache hit", "reviewId", reviewID)
-		return value.([]model.Investigation), nil
+		return value.(*[]model.Investigation), nil
 	}
 	slog.Debug("InvestigationRepoCache.FindAll: cache miss", "reviewId", reviewID)
 
