@@ -174,3 +174,25 @@ func (us *UserService) CreateAdminUser(name string, email string, password strin
 	slog.Info("create admin user", "result", "success", "email", email)
 	return nil
 }
+
+func (us *UserService) FindById(loggedUserId uuid.UUID, userId uuid.UUID) (*model.User, error) {
+	user, err := us.UserRepo.GetById(userId)
+	if err != nil {
+		if errors.Is(err, repo.NotFoundInRepo) {
+			slog.Warn("user find by id", "error", "user not found", "userId", userId)
+			return nil, ErrorUserNotFound
+		} else {
+			slog.Warn("user find by id", "error", err, "userId", userId)
+			return nil, common.DbInternalError
+		}
+	}
+
+	if loggedUserId != userId {
+		_, err := us.checkIsAdmin(loggedUserId)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return user, nil
+}

@@ -102,7 +102,7 @@ func main() {
 	handler.RegisterOrganizationHandler(r, organizationService, authMiddleware)
 	handler.RegisterReviewHandler(r, reviewService, investigationService, tokenMiddleware, reviewMiddleware, investigationMiddleware)
 	handler.RegisterInvestigationHandler(r, reviewService, investigationService, tokenMiddleware, reviewMiddleware, investigationMiddleware)
-
+	handler.RegisterProfileHandler(r, userService, tokenMiddleware)
 	slog.Info("routes registered")
 
 	r.Run(os.Getenv("PORT"))
