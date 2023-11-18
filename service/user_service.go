@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/exp/slog"
 	"sci-review/common"
 	"sci-review/form"
@@ -194,5 +195,47 @@ func (us *UserService) FindById(loggedUserId uuid.UUID, userId uuid.UUID) (*mode
 		}
 	}
 
+	if !user.Active {
+		slog.Warn("change password", "error", "user not active", "userId", userId)
+		return nil, ErrorUserNotActive
+	}
+
 	return user, nil
+}
+
+func (us *UserService) ChangePassword(loggedUserId uuid.UUID, userId uuid.UUID, passwordForm *form.ChangePasswordForm) error {
+	user, err := us.UserRepo.GetById(userId)
+	if err != nil {
+		if errors.Is(err, repo.NotFoundInRepo) {
+			slog.Warn("change password", "error", "user not found", "userId", userId)
+			return ErrorUserNotFound
+		} else {
+			slog.Warn("change password", "error", err, "userId", userId)
+			return common.DbInternalError
+		}
+	}
+
+	if loggedUserId != userId {
+		return common.ForbiddenError
+	}
+
+	if !user.Active {
+		slog.Warn("change password", "error", "user not active", "userId", userId)
+		return ErrorUserNotActive
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(passwordForm.CurrentPassword))
+	if err != nil {
+		slog.Warn("change password", "error", "invalid password", "userId", userId)
+		return ErrorPasswordIsNotValid
+	}
+
+	user.SetNewPassword(passwordForm.NewPassword)
+	err = us.UserRepo.Update(user)
+	if err != nil {
+		slog.Warn("change password", "error", err.Error())
+		return err
+	}
+
+	return nil
 }

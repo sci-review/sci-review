@@ -36,6 +36,12 @@ func (u User) IsAdmin() bool {
 	return u.Role == UserAdmin
 }
 
+func (u *User) SetNewPassword(password string) {
+	passwordHash, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	u.Password = string(passwordHash)
+	u.UpdatedAt = time.Now()
+}
+
 func (u User) LogValue() slog.Value {
 	return slog.GroupValue(
 		slog.String("id", u.Id.String()),
