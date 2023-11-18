@@ -71,6 +71,33 @@ func (rh *ReviewHandler) Show(c *gin.Context) {
 	c.JSON(200, review)
 }
 
+func (rh *ReviewHandler) Update(c *gin.Context) {
+	principal := c.MustGet("principal").(*model.Principal)
+	review := c.MustGet("review").(*model.Review)
+
+	reviewForm := new(form.ReviewCreateForm)
+	if err := c.ShouldBind(&reviewForm); err != nil {
+		slog.Warn("review update", "error", err.Error())
+		c.JSON(400, common.InvalidJson())
+		return
+	}
+	slog.Info("review update", "data", reviewForm)
+
+	if err := common.Validate(reviewForm); len(err) > 0 {
+		slog.Warn("review update", "error", "validation error")
+		c.JSON(400, common.ProblemWithErrors(err))
+		return
+	}
+
+	review, err := rh.ReviewService.Update(review.Id, *reviewForm, principal.Id)
+	if err != nil {
+		c.JSON(409, common.NewProblemDetail(err.Error(), 409))
+		return
+	}
+
+	c.JSON(200, review)
+}
+
 func RegisterReviewHandler(
 	r *gin.Engine,
 	reviewService *service.ReviewService,
@@ -83,4 +110,5 @@ func RegisterReviewHandler(
 	r.GET("/api/reviews", tokenMiddleware, reviewHandler.Index)
 	r.POST("/api/reviews", tokenMiddleware, reviewHandler.Create)
 	r.GET("/api/reviews/:reviewId", tokenMiddleware, reviewMiddleware, reviewHandler.Show)
+	r.PUT("/api/reviews/:reviewId", tokenMiddleware, reviewMiddleware, reviewHandler.Update)
 }

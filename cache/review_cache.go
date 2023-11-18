@@ -51,6 +51,19 @@ func (r ReviewRepoCache) AddReviewer(reviewer *model.Reviewer, tx *sqlx.Tx) erro
 	return nil
 }
 
+func (r ReviewRepoCache) Update(review *model.Review) error {
+	err := r.ReviewRepo.Update(review)
+	if err != nil {
+		return err
+	}
+
+	r.AppCache.Delete(findAllReviewKey(review.OwnerId))
+	r.AppCache.Delete(findOneReviewKey(review.Id))
+	slog.Debug("ReviewRepoCache.Update: cache cleared", "userId", review.OwnerId)
+
+	return nil
+}
+
 func (r ReviewRepoCache) FindAllByUserId(userId uuid.UUID) (*[]model.Review, error) {
 	value, found := r.AppCache.Get(findAllReviewKey(userId))
 	if found {

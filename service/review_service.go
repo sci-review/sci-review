@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/google/uuid"
 	"golang.org/x/exp/slog"
+	"sci-review/common"
 	"sci-review/form"
 	"sci-review/model"
 	"sci-review/repo"
@@ -89,5 +90,57 @@ func (s *ReviewService) FindById(id uuid.UUID, userId uuid.UUID) (*model.Review,
 	if err != nil {
 		return nil, ErrorReviewNotFound
 	}
+	return review, nil
+}
+
+func (s *ReviewService) Update(reviewId uuid.UUID, createForm form.ReviewCreateForm, loggedUserId uuid.UUID) (*model.Review, error) {
+	review, err := s.ReviewRepo.FindById(reviewId)
+	if err != nil {
+		return nil, ErrorReviewNotFound
+	}
+
+	startDate, err := time.Parse(time.RFC3339, createForm.StartDate)
+	if err != nil {
+		slog.Error(err.Error())
+		return nil, ErrorParseStartDate
+	}
+
+	endDate, err := time.Parse(time.RFC3339, createForm.EndDate)
+	if err != nil {
+		slog.Error(err.Error())
+		return nil, ErrorParseEndDate
+	}
+
+	if endDate.Before(startDate) || endDate.Equal(startDate) {
+		slog.Error("end date must be after start date")
+		return nil, ErrorReviewDate
+	}
+
+	user, err := s.UserRepo.GetById(loggedUserId)
+	if err != nil {
+		return nil, err
+	}
+
+	if !user.Active {
+		slog.Error("create review", "error", "user not active", "user", user)
+		return nil, ErrorUserNotActive
+	}
+
+	// user must be owner of review
+	if review.OwnerId != loggedUserId {
+		return nil, common.ForbiddenError
+	}
+
+	review.Title = createForm.Title
+	review.ReviewType = createForm.Type
+	review.StartDate = startDate
+	review.EndDate = endDate
+	review.UpdatedAt = time.Now()
+
+	err = s.ReviewRepo.Update(review)
+	if err != nil {
+		return nil, err
+	}
+
 	return review, nil
 }

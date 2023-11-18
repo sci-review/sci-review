@@ -12,6 +12,7 @@ type ReviewRepo interface {
 	FindAllByUserId(userId uuid.UUID) (*[]model.Review, error)
 	FindById(id uuid.UUID) (*model.Review, error)
 	GetDB() *sqlx.DB
+	Update(review *model.Review) error
 }
 
 type ReviewRepoSql struct {
@@ -81,6 +82,20 @@ func (r *ReviewRepoSql) FindById(id uuid.UUID) (*model.Review, error) {
 	}
 
 	return &review, nil
+}
+
+func (r *ReviewRepoSql) Update(review *model.Review) error {
+	query := `
+		UPDATE reviews
+		SET title = :title, type = :type, start_date = :start_date, end_date = :end_date, archived = :archived, updated_at = :updated_at
+		WHERE id = :id
+	`
+	_, err := r.DB.NamedExec(query, review)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (r *ReviewRepoSql) GetDB() *sqlx.DB {
