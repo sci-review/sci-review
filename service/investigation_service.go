@@ -5,7 +5,6 @@ import (
 	"sci-review/form"
 	"sci-review/model"
 	"sci-review/repo"
-	"strings"
 )
 
 type InvestigationService struct {
@@ -35,22 +34,16 @@ func (ps *InvestigationService) FindOneById(investigationId uuid.UUID, userId uu
 	return ps.InvestigationRepo.FindOne(investigationId)
 }
 
-func (ps *InvestigationService) SaveKeyword(investigationId uuid.UUID, userId uuid.UUID, keywordForm form.KeywordForm) error {
-	formSynonyms := strings.Split(keywordForm.Synonyms, "\n")
-	var synonyms []string
-
-	// trim spaces and remove empty synonyms
-	for _, synonym := range formSynonyms {
-		synonym = strings.TrimSpace(synonym)
-		if synonym != "" {
-			synonyms = append(synonyms, synonym)
-		}
+func (ps *InvestigationService) SaveKeyword(investigationId uuid.UUID, userId uuid.UUID, keywordForm form.KeywordForm) (*model.InvestigationKeyword, error) {
+	keyword := model.NewInvestigationKeyword(userId, investigationId, keywordForm.Word, keywordForm.Synonyms)
+	err := ps.InvestigationRepo.SaveKeyword(keyword)
+	if err != nil {
+		return nil, err
 	}
 
-	keyword := model.NewInvestigationKeyword(userId, investigationId, keywordForm.Word, synonyms)
-	return ps.InvestigationRepo.SaveKeyword(keyword)
+	return keyword, nil
 }
 
-func (ps *InvestigationService) GetKeywordsByInvestigationId(investigationId uuid.UUID) ([]model.InvestigationKeyword, error) {
+func (ps *InvestigationService) GetKeywordsByInvestigationId(investigationId uuid.UUID) (*[]model.InvestigationKeyword, error) {
 	return ps.InvestigationRepo.GetKeywordsByInvestigationId(investigationId)
 }

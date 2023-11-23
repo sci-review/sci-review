@@ -12,7 +12,7 @@ type InvestigationRepo interface {
 	FindAll(reviewID uuid.UUID) (*[]model.Investigation, error)
 	FindOne(investigationId uuid.UUID) (*model.Investigation, error)
 	SaveKeyword(investigationKeyword *model.InvestigationKeyword) error
-	GetKeywordsByInvestigationId(investigationId uuid.UUID) ([]model.InvestigationKeyword, error)
+	GetKeywordsByInvestigationId(investigationId uuid.UUID) (*[]model.InvestigationKeyword, error)
 }
 
 type InvestigationRepoSql struct {
@@ -76,7 +76,7 @@ func (pr *InvestigationRepoSql) SaveKeyword(investigationKeyword *model.Investig
 	return nil
 }
 
-func (pr *InvestigationRepoSql) GetKeywordsByInvestigationId(investigationId uuid.UUID) ([]model.InvestigationKeyword, error) {
+func (pr *InvestigationRepoSql) GetKeywordsByInvestigationId(investigationId uuid.UUID) (*[]model.InvestigationKeyword, error) {
 	var keywords []model.InvestigationKeyword
 	query := `SELECT * FROM investigation_keywords WHERE investigation_id = $1`
 	err := pr.DB.Select(&keywords, query, investigationId)
@@ -84,5 +84,10 @@ func (pr *InvestigationRepoSql) GetKeywordsByInvestigationId(investigationId uui
 		slog.Error("error", "error", err)
 		return nil, err
 	}
-	return keywords, nil
+
+	if len(keywords) == 0 {
+		return &[]model.InvestigationKeyword{}, nil
+	}
+
+	return &keywords, nil
 }

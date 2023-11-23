@@ -13,6 +13,10 @@ func (s *Strings) Scan(src interface{}) (err error) {
 	var synonyms []string
 	switch src.(type) {
 	case string:
+		if src.(string) == "{}" {
+			synonyms = []string{}
+			break
+		}
 		// convert this string "{word1,word2,word3}" to []string
 		//remove first and last character
 		src = src.(string)[1 : len(src.(string))-1]

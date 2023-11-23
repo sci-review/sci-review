@@ -82,6 +82,6 @@ func (rc *InvestigationRepoCache) SaveKeyword(investigationKeyword *model.Invest
 	return rc.InvestigationRepo.SaveKeyword(investigationKeyword)
 }
 
-func (rc *InvestigationRepoCache) GetKeywordsByInvestigationId(investigationId uuid.UUID) ([]model.InvestigationKeyword, error) {
+func (rc *InvestigationRepoCache) GetKeywordsByInvestigationId(investigationId uuid.UUID) (*[]model.InvestigationKeyword, error) {
 	return rc.InvestigationRepo.GetKeywordsByInvestigationId(investigationId)
 }
