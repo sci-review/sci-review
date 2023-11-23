@@ -47,3 +47,22 @@ func (ps *InvestigationService) SaveKeyword(investigationId uuid.UUID, userId uu
 func (ps *InvestigationService) GetKeywordsByInvestigationId(investigationId uuid.UUID) (*[]model.InvestigationKeyword, error) {
 	return ps.InvestigationRepo.GetKeywordsByInvestigationId(investigationId)
 }
+
+func (ps *InvestigationService) DeleteKeyword(keywordId uuid.UUID) error {
+	return ps.InvestigationRepo.DeleteKeyword(keywordId)
+}
+
+func (ps *InvestigationService) UpdateKeyword(keywordId uuid.UUID, keywordForm form.KeywordForm) (*model.InvestigationKeyword, error) {
+	keyword, err := ps.InvestigationRepo.GetKeywordsById(keywordId)
+	if err != nil {
+		return nil, err
+	}
+
+	keyword.Update(keywordForm.Word, keywordForm.Synonyms)
+	updatedKeyword, err := ps.InvestigationRepo.UpdateKeyword(keyword)
+	if err != nil {
+		return nil, err
+	}
+
+	return updatedKeyword, nil
+}

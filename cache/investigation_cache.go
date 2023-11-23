@@ -85,3 +85,15 @@ func (rc *InvestigationRepoCache) SaveKeyword(investigationKeyword *model.Invest
 func (rc *InvestigationRepoCache) GetKeywordsByInvestigationId(investigationId uuid.UUID) (*[]model.InvestigationKeyword, error) {
 	return rc.InvestigationRepo.GetKeywordsByInvestigationId(investigationId)
 }
+
+func (rc *InvestigationRepoCache) GetKeywordsById(keywordId uuid.UUID) (*model.InvestigationKeyword, error) {
+	return rc.InvestigationRepo.GetKeywordsById(keywordId)
+}
+
+func (rc *InvestigationRepoCache) DeleteKeyword(keywordId uuid.UUID) error {
+	return rc.InvestigationRepo.DeleteKeyword(keywordId)
+}
+
+func (rc *InvestigationRepoCache) UpdateKeyword(investigationKeyword *model.InvestigationKeyword) (*model.InvestigationKeyword, error) {
+	return rc.InvestigationRepo.UpdateKeyword(investigationKeyword)
+}

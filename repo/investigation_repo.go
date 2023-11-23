@@ -13,6 +13,9 @@ type InvestigationRepo interface {
 	FindOne(investigationId uuid.UUID) (*model.Investigation, error)
 	SaveKeyword(investigationKeyword *model.InvestigationKeyword) error
 	GetKeywordsByInvestigationId(investigationId uuid.UUID) (*[]model.InvestigationKeyword, error)
+	GetKeywordsById(id uuid.UUID) (*model.InvestigationKeyword, error)
+	DeleteKeyword(id uuid.UUID) error
+	UpdateKeyword(investigationKeyword *model.InvestigationKeyword) (*model.InvestigationKeyword, error)
 }
 
 type InvestigationRepoSql struct {
@@ -90,4 +93,36 @@ func (pr *InvestigationRepoSql) GetKeywordsByInvestigationId(investigationId uui
 	}
 
 	return &keywords, nil
+}
+
+func (pr *InvestigationRepoSql) GetKeywordsById(id uuid.UUID) (*model.InvestigationKeyword, error) {
+	var keyword model.InvestigationKeyword
+	query := `SELECT * FROM investigation_keywords WHERE id = $1`
+	err := pr.DB.Get(&keyword, query, id)
+	if err != nil {
+		return nil, err
+	}
+	return &keyword, nil
+
+}
+
+func (pr *InvestigationRepoSql) DeleteKeyword(id uuid.UUID) error {
+	query := `DELETE FROM investigation_keywords WHERE id = $1`
+	_, err := pr.DB.Exec(query, id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (pr *InvestigationRepoSql) UpdateKeyword(investigationKeyword *model.InvestigationKeyword) (*model.InvestigationKeyword, error) {
+	query := `
+		UPDATE investigation_keywords SET word = :word, synonyms = :synonyms, updated_at = :updated_at
+		WHERE id = :id
+	`
+	_, err := pr.DB.NamedExec(query, investigationKeyword)
+	if err != nil {
+		return nil, err
+	}
+	return investigationKeyword, nil
 }

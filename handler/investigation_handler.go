@@ -2,6 +2,7 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"golang.org/x/exp/slog"
 	"sci-review/common"
 	"sci-review/form"
@@ -126,6 +127,60 @@ func (pi *InvestigationHandler) GetAllKeywords(c *gin.Context) {
 	c.JSON(200, keywords)
 }
 
+func (pi *InvestigationHandler) DeleteKeyword(c *gin.Context) {
+	//principal := c.MustGet("principal").(*model.Principal)
+	//review := c.MustGet("review").(*model.Review)
+	//investigation := c.MustGet("investigation").(*model.Investigation)
+
+	keywordId, err := uuid.Parse(c.Param("keywordId"))
+	if err != nil {
+		c.JSON(400, common.NewProblemDetail(err.Error(), 400))
+		return
+	}
+
+	err = pi.InvestigationService.DeleteKeyword(keywordId)
+	if err != nil {
+		c.JSON(500, common.NewProblemDetail(err.Error(), 500))
+		return
+	}
+
+	c.JSON(200, gin.H{})
+}
+
+func (pi *InvestigationHandler) UpdateKeyword(c *gin.Context) {
+	//principal := c.MustGet("principal").(*model.Principal)
+	//review := c.MustGet("review").(*model.Review)
+	//investigation := c.MustGet("investigation").(*model.Investigation)
+
+	keywordId, err := uuid.Parse(c.Param("keywordId"))
+	if err != nil {
+		c.JSON(400, common.NewProblemDetail(err.Error(), 400))
+		return
+	}
+
+	keywordForm := new(form.KeywordForm)
+	if err := c.ShouldBind(&keywordForm); err != nil {
+		slog.Warn("investigation keyword update", "error", err.Error())
+		c.JSON(400, common.InvalidJson())
+		return
+	}
+	slog.Info("investigation keyword update", "data", keywordForm)
+
+	if err := common.Validate(keywordForm); len(err) > 0 {
+		slog.Warn("investigation keyword update", "error", "validation error")
+		c.JSON(400, common.ProblemWithErrors(err))
+		return
+	}
+
+	keyword, err := pi.InvestigationService.UpdateKeyword(keywordId, *keywordForm)
+	if err != nil {
+		c.JSON(409, common.NewProblemDetail(err.Error(), 409))
+		return
+	}
+
+	c.JSON(200, keyword)
+}
+
 func RegisterInvestigationHandler(
 	r *gin.Engine,
 	reviewService *service.ReviewService,
@@ -168,6 +223,22 @@ func RegisterInvestigationHandler(
 		reviewMiddleware,
 		investigationMiddleware,
 		investigationHandler.GetAllKeywords,
+	)
+
+	r.DELETE(
+		"/api/reviews/:reviewId/investigations/:investigationId/keywords/:keywordId",
+		tokenMiddleware,
+		reviewMiddleware,
+		investigationMiddleware,
+		investigationHandler.DeleteKeyword,
+	)
+
+	r.PUT(
+		"/api/reviews/:reviewId/investigations/:investigationId/keywords/:keywordId",
+		tokenMiddleware,
+		reviewMiddleware,
+		investigationMiddleware,
+		investigationHandler.UpdateKeyword,
 	)
 
 }

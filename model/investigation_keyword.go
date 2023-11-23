@@ -58,3 +58,9 @@ func NewInvestigationKeyword(userId uuid.UUID, investigationId uuid.UUID, word s
 		UpdatedAt:       time.Now(),
 	}
 }
+
+func (i *InvestigationKeyword) Update(word string, synonyms []string) {
+	i.Word = word
+	i.Synonyms = synonyms
+	i.UpdatedAt = time.Now()
+}
